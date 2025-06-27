@@ -12,8 +12,8 @@
   interface Props {
     temperature: number
     unit: TemperatureUnit
-    size?: 'small' | 'medium' | 'large'
-    variant?: 'primary' | 'secondary' | 'muted' | 'strong'
+    size?: 'small' | 'medium' | 'large' | 'xl'
+    variant?: 'primary' | 'secondary' | 'muted' | 'strong' | 'inline'
   }
 
   const props = withDefaults(defineProps<Props>(), {
@@ -51,6 +51,11 @@
       font-size: 2.5rem;
     }
 
+    &--xl {
+      font-size: 3.5rem;
+      font-weight: 700;
+    }
+
     &--primary {
       color: rgb(var(--v-theme-primary));
     }
@@ -65,6 +70,11 @@
 
     &--strong {
       font-weight: 700;
+    }
+
+    &--inline {
+      display: inline;
+      font-weight: inherit;
     }
   }
 </style>

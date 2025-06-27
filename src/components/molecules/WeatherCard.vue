@@ -4,9 +4,11 @@
     :class="weatherConditionClass"
     elevation="2"
     rounded="xl"
+    @click="navigateToDetails"
   >
     <v-card-text class="pa-4">
-      <div class="weather-card__header">
+      <div class="weather-card__content">
+        <!-- Left side: Location -->
         <div class="weather-card__location">
           <h3 class="text-h6 font-weight-bold">
             {{ weather.name }}
@@ -15,151 +17,66 @@
             {{ weather.sys.country }}
           </p>
         </div>
-        <v-btn
-          :color="isFavorite ? 'error' : 'white'"
-          :icon="isFavorite ? 'mdi-heart' : 'mdi-heart-outline'"
-          size="small"
-          variant="text"
-          @click="toggleFavorite"
-        />
-      </div>
 
-      <div class="weather-card__main">
-        <div class="weather-card__temperature">
-          <TemperatureDisplay
-            size="large"
-            :temperature="weather.main.temp"
-            :unit="unit"
-          />
-          <div class="weather-card__feels-like">
-            <span class="text-caption text-medium-emphasis">
-              Feels like
-            </span>
+        <!-- Right side: Temperature and Icon -->
+        <div class="weather-card__temperature-section">
+          <!-- Large temperature display -->
+          <div class="weather-card__temperature">
             <TemperatureDisplay
-              size="small"
-              :temperature="weather.main.feels_like"
+              size="xl"
+              :temperature="weather.main.temp"
               :unit="unit"
-              variant="muted"
+            />
+          </div>
+          
+          <!-- Weather icon below temperature -->
+          <div class="weather-card__icon">
+            <WeatherIcon
+              :description="weather.weather[0].description"
+              :icon-code="weather.weather[0].icon"
+              size="2x"
             />
           </div>
         </div>
+      </div>
 
-        <div class="weather-card__icon">
-          <WeatherIcon
-            :description="weather.weather[0].description"
-            :icon-code="weather.weather[0].icon"
-            size="4x"
+      <!-- High/Low temperatures in bottom right -->
+      <div class="weather-card__high-low">
+        <span class="text-caption">
+          H: <TemperatureDisplay
+            size="small"
+            :temperature="weather.main.temp_max"
+            :unit="unit"
+            variant="inline"
           />
-          <p class="text-body-2 text-center text-capitalize mt-2">
-            {{ weather.weather[0].description }}
-          </p>
-        </div>
+        </span>
+        <span class="text-caption ml-3">
+          L: <TemperatureDisplay
+            size="small"
+            :temperature="weather.main.temp_min"
+            :unit="unit"
+            variant="inline"
+          />
+        </span>
       </div>
 
-      <v-divider class="my-4" />
-
-      <div class="weather-card__details">
-        <v-row dense>
-          <v-col
-            cols="6"
-            sm="3"
-          >
-            <div class="weather-card__detail">
-              <v-icon
-                icon="mdi-thermometer-high"
-                size="small"
-              />
-              <div class="ml-2">
-                <p class="text-caption font-weight-medium">
-                  High
-                </p>
-                <TemperatureDisplay
-                  :temperature="weather.main.temp_max"
-                  :unit="unit"
-                  size="small"
-                  variant="strong"
-                />
-              </div>
-            </div>
-          </v-col>
-
-          <v-col
-            cols="6"
-            sm="3"
-          >
-            <div class="weather-card__detail">
-              <v-icon
-                icon="mdi-thermometer-low"
-                size="small"
-              />
-              <div class="ml-2">
-                <p class="text-caption font-weight-medium">
-                  Low
-                </p>
-                <TemperatureDisplay
-                  :temperature="weather.main.temp_min"
-                  :unit="unit"
-                  size="small"
-                  variant="strong"
-                />
-              </div>
-            </div>
-          </v-col>
-
-          <v-col
-            cols="6"
-            sm="3"
-          >
-            <div class="weather-card__detail">
-              <v-icon
-                icon="mdi-water-percent"
-                size="small"
-              />
-              <div class="ml-2">
-                <p class="text-caption font-weight-medium">
-                  Humidity
-                </p>
-                <p class="text-body-2 font-weight-bold">
-                  {{ weather.main.humidity }}%
-                </p>
-              </div>
-            </div>
-          </v-col>
-
-          <v-col
-            cols="6"
-            sm="3"
-          >
-            <div class="weather-card__detail">
-              <v-icon
-                icon="mdi-weather-windy"
-                size="small"
-              />
-              <div class="ml-2">
-                <p class="text-caption font-weight-medium">
-                  Wind
-                </p>
-                <p class="text-body-2 font-weight-bold">
-                  {{ weather.wind.speed.toFixed(1) }} m/s
-                </p>
-              </div>
-            </div>
-          </v-col>
-        </v-row>
-      </div>
-
-      <div class="weather-card__footer mt-4">
-        <p class="text-caption text-medium-emphasis">
-          Last updated: {{ formatTime(weather.dt) }}
-        </p>
-      </div>
+      <!-- Favorite button (optional - can be removed if not needed) -->
+      <v-btn
+        class="weather-card__favorite-btn"
+        :color="isFavorite ? 'error' : 'white'"
+        :icon="isFavorite ? 'mdi-heart' : 'mdi-heart-outline'"
+        size="small"
+        variant="text"
+        @click.stop="toggleFavorite"
+      />
     </v-card-text>
   </v-card>
 </template>
 
 <script setup lang="ts">
-  import { computed } from 'vue'
   import type { TemperatureUnit, WeatherData } from '@/types/weather'
+  import { computed } from 'vue'
+  import { useRouter } from 'vue-router'
   import TemperatureDisplay from '@/components/atoms/TemperatureDisplay.vue'
   import WeatherIcon from '@/components/atoms/WeatherIcon.vue'
 
@@ -178,6 +95,7 @@
   })
 
   const emit = defineEmits<Emits>()
+  const router = useRouter()
 
   const weatherConditionClass = computed(() => {
     if (!props.weather.weather || props.weather.weather.length === 0) {
@@ -216,17 +134,21 @@
     emit('toggle-favorite', props.weather.name)
   }
 
-  const formatTime = (timestamp: number): string => {
-    return new Date(timestamp * 1000).toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    })
+  const navigateToDetails = () => {
+    router.push(`/weather/${encodeURIComponent(props.weather.name)}`)
   }
 </script>
 
 <style scoped lang="scss">
   .weather-card {
     transition: all 0.3s ease-in-out;
+    cursor: pointer;
+    position: relative;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
 
     &--clear {
       background: linear-gradient(45deg, #2980b9, #6dd5fa);
@@ -258,7 +180,7 @@
       color: white;
     }
 
-    &__header {
+    &__content {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
@@ -267,45 +189,38 @@
 
     &__location {
       flex: 1;
+      min-width: 0; // Allows text truncation if needed
     }
 
-    &__main {
+    &__temperature-section {
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
       align-items: center;
-      margin-bottom: 1rem;
+      gap: 0.5rem;
     }
 
     &__temperature {
       display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    &__feels-like {
-      display: flex;
       align-items: center;
-      gap: 0.5rem;
-      margin-top: 0.5rem;
     }
 
     &__icon {
       display: flex;
-      flex-direction: column;
-      align-items: center;
+      justify-content: center;
     }
 
-    &__details {
-      margin-top: 1rem;
-    }
-
-    &__detail {
+    &__high-low {
       display: flex;
+      justify-content: flex-end;
       align-items: center;
+      margin-top: 0.5rem;
     }
 
-    &__footer {
-      text-align: center;
+    &__favorite-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 1;
     }
   }
 
@@ -331,21 +246,23 @@
     .v-icon {
       color: white !important;
     }
-    .v-divider {
-      border-color: rgba(255, 255, 255, 0.12);
-    }
   }
 
   @media (max-width: 600px) {
     .weather-card {
-      &__main {
+      &__content {
         flex-direction: column;
-        gap: 1rem;
         text-align: center;
+        gap: 1rem;
       }
 
-      &__temperature {
+      &__temperature-section {
         align-items: center;
+        width: 100%;
+      }
+
+      &__high-low {
+        justify-content: center;
       }
     }
   }
