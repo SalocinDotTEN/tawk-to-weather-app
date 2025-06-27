@@ -2,7 +2,7 @@
   <v-card
     class="weather-card"
     elevation="2"
-    rounded="lg"
+    rounded="xl"
   >
     <v-card-text class="pa-4">
       <div class="weather-card__header">
