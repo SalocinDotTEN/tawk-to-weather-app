@@ -1,47 +1,13 @@
 <template>
   <div class="weather-page">
     <!-- Header with search and controls -->
-    <v-app-bar
-      color="primary"
-      density="comfortable"
-      elevation="2"
-    >
+    <v-app-bar color="primary" density="comfortable" elevation="2">
       <v-app-bar-title class="text-h6 font-weight-bold">
-        <v-icon
-          class="mr-2"
-          icon="mdi-weather-partly-cloudy"
-        />
-        Weather App
+        <v-icon class="mr-2" icon="mdi-weather-partly-cloudy" />
       </v-app-bar-title>
-
       <v-spacer />
-
-      <!-- Temperature unit toggle -->
-      <v-btn-toggle
-        v-model="selectedUnit"
-        color="white"
-        density="compact"
-        mandatory
-        variant="outlined"
-        @update:model-value="handleUnitChange"
-      >
-        <v-btn
-          size="small"
-          value="metric"
-        >
-          °C
-        </v-btn>
-        <v-btn
-          size="small"
-          value="imperial"
-        >
-          °F
-        </v-btn>
-      </v-btn-toggle>
-
       <!-- Theme toggle button -->
       <ThemeToggle class="ml-2" />
-
       <!-- Refresh button -->
       <v-btn
         class="ml-2"
@@ -51,13 +17,32 @@
         @click="handleRefresh"
       />
     </v-app-bar>
-
     <!-- Main content -->
     <v-main class="weather-page__main">
-      <v-container
-        class="py-6"
-        fluid
-      >
+      <v-container class="py-6" fluid>
+        <v-row class="mb-4">
+          <v-col
+            cols="12"
+            lg="8"
+            md="10"
+            offset-lg="2"
+            offset-md="1"
+          >
+            <h1 class="text-h4 font-weight-bold"> Weather </h1>
+            <!-- Temperature unit toggle -->
+            <v-btn-toggle
+              v-model="selectedUnit"
+              color="primary"
+              density="compact"
+              mandatory
+              variant="outlined"
+              @update:model-value="handleUnitChange"
+            >
+              <v-btn size="small" value="metric"> °C </v-btn>
+              <v-btn size="small" value="imperial"> °F </v-btn>
+            </v-btn-toggle>
+          </v-col>
+        </v-row>
         <!-- Search section -->
         <v-row class="mb-6">
           <v-col
@@ -78,7 +63,6 @@
             />
           </v-col>
         </v-row>
-
         <!-- Error message -->
         <v-row v-if="error">
           <v-col
@@ -97,7 +81,6 @@
             />
           </v-col>
         </v-row>
-
         <!-- Weather content -->
         <div v-if="currentWeather">
           <v-row>
@@ -117,7 +100,6 @@
               />
             </v-col>
           </v-row>
-
           <!-- Forecast section -->
           <v-row class="mt-6">
             <v-col
@@ -127,21 +109,12 @@
               offset-lg="2"
               offset-md="1"
             >
-              <ForecastList
-                :error="forecastError"
-                :forecast="forecast"
-                :loading="forecastLoading"
-                :unit="unit"
-              />
+              <ForecastList :error="forecastError" :forecast="forecast" :loading="forecastLoading" :unit="unit" />
             </v-col>
           </v-row>
         </div>
-
         <!-- Empty state -->
-        <div
-          v-else-if="!loading"
-          class="weather-page__empty"
-        >
+        <div v-else-if="!loading" class="weather-page__empty">
           <v-row>
             <v-col
               cols="12"
@@ -150,22 +123,11 @@
               offset-lg="3"
               offset-md="2"
             >
-              <v-card
-                class="text-center pa-8"
-                elevation="1"
-                rounded="lg"
-              >
-                <v-icon
-                  color="grey-lighten-1"
-                  icon="mdi-weather-cloudy"
-                  size="80"
-                />
-                <h2 class="text-h5 font-weight-bold mt-4 mb-2">
-                  Welcome to Weather App
-                </h2>
-                <p class="text-body-1 text-medium-emphasis mb-4">
-                  Search for a city to get started, or use your current location
-                </p>
+              <v-card class="text-center pa-8" elevation="1" rounded="lg">
+                <v-icon color="grey-lighten-1" icon="mdi-weather-cloudy" size="80" />
+                <h2 class="text-h5 font-weight-bold mt-4 mb-2"> Welcome to Weather App </h2>
+                <p class="text-body-1 text-medium-emphasis mb-4"> Search for a city to get started, or use your current
+                  location </p>
                 <v-btn
                   color="primary"
                   :loading="locationLoading"
@@ -173,19 +135,13 @@
                   size="large"
                   variant="elevated"
                   @click="handleLocationSearch"
-                >
-                  Use My Location
-                </v-btn>
+                > Use My Location </v-btn>
               </v-card>
             </v-col>
           </v-row>
         </div>
-
         <!-- Favorites section -->
-        <div
-          v-if="favorites.length > 0"
-          class="weather-page__favorites mt-8"
-        >
+        <div v-if="favorites.length > 0" class="weather-page__favorites mt-8">
           <v-row>
             <v-col
               cols="12"
@@ -194,25 +150,12 @@
               offset-lg="2"
               offset-md="1"
             >
-              <v-card
-                elevation="1"
-                rounded="lg"
-              >
+              <v-card elevation="1" rounded="lg">
                 <v-card-title class="pb-2">
-                  <v-icon
-                    class="mr-2"
-                    icon="mdi-heart"
-                  />
-                  Favorite Cities
-                </v-card-title>
+                  <v-icon class="mr-2" icon="mdi-heart" /> Favorite Cities </v-card-title>
                 <v-card-text class="pa-0">
                   <v-list density="compact">
-                    <v-list-item
-                      v-for="city in favorites"
-                      :key="city"
-                      :title="city"
-                      @click="handleSearch(city)"
-                    >
+                    <v-list-item v-for="city in favorites" :key="city" :title="city" @click="handleSearch(city)">
                       <template #prepend>
                         <v-icon icon="mdi-map-marker" />
                       </template>
