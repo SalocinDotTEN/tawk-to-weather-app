@@ -6,16 +6,13 @@
     rounded="xl"
     @click="navigateToDetails"
   >
-    <v-card-text class="pa-4">
+    <v-card-text class="pa-4 text-white">
       <div class="weather-card__content">
         <!-- Left side: Location -->
         <div class="weather-card__location">
           <h3 class="text-h6 font-weight-bold">
-            {{ weather.name }}
+            {{ weather.name }}, {{ weather.sys.country }}
           </h3>
-          <p class="text-caption text-medium-emphasis">
-            {{ weather.sys.country }}
-          </p>
         </div>
 
         <!-- Right side: Temperature -->
@@ -26,6 +23,7 @@
               size="xl"
               :temperature="weather.main.temp"
               :unit="unit"
+              variant="inline"
             />
           </div>
         </div>
