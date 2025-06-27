@@ -13,7 +13,7 @@
     temperature: number
     unit: TemperatureUnit
     size?: 'small' | 'medium' | 'large'
-    variant?: 'primary' | 'secondary' | 'muted'
+    variant?: 'primary' | 'secondary' | 'muted' | 'strong'
   }
 
   const props = withDefaults(defineProps<Props>(), {
@@ -61,6 +61,10 @@
 
     &--muted {
       color: rgb(var(--v-theme-on-surface-variant));
+    }
+
+    &--strong {
+      font-weight: 700;
     }
   }
 </style>

@@ -1,6 +1,7 @@
 <template>
   <v-card
     class="weather-card"
+    :class="weatherConditionClass"
     elevation="2"
     rounded="xl"
   >
@@ -15,7 +16,7 @@
           </p>
         </div>
         <v-btn
-          :color="isFavorite ? 'error' : 'grey'"
+          :color="isFavorite ? 'error' : 'white'"
           :icon="isFavorite ? 'mdi-heart' : 'mdi-heart-outline'"
           size="small"
           variant="text"
@@ -65,18 +66,18 @@
           >
             <div class="weather-card__detail">
               <v-icon
-                color="primary"
                 icon="mdi-thermometer-high"
                 size="small"
               />
               <div class="ml-2">
-                <p class="text-caption text-medium-emphasis">
+                <p class="text-caption font-weight-medium">
                   High
                 </p>
                 <TemperatureDisplay
-                  size="small"
                   :temperature="weather.main.temp_max"
                   :unit="unit"
+                  size="small"
+                  variant="strong"
                 />
               </div>
             </div>
@@ -88,18 +89,18 @@
           >
             <div class="weather-card__detail">
               <v-icon
-                color="info"
                 icon="mdi-thermometer-low"
                 size="small"
               />
               <div class="ml-2">
-                <p class="text-caption text-medium-emphasis">
+                <p class="text-caption font-weight-medium">
                   Low
                 </p>
                 <TemperatureDisplay
-                  size="small"
                   :temperature="weather.main.temp_min"
                   :unit="unit"
+                  size="small"
+                  variant="strong"
                 />
               </div>
             </div>
@@ -111,15 +112,14 @@
           >
             <div class="weather-card__detail">
               <v-icon
-                color="secondary"
                 icon="mdi-water-percent"
                 size="small"
               />
               <div class="ml-2">
-                <p class="text-caption text-medium-emphasis">
+                <p class="text-caption font-weight-medium">
                   Humidity
                 </p>
-                <p class="text-body-2 font-weight-medium">
+                <p class="text-body-2 font-weight-bold">
                   {{ weather.main.humidity }}%
                 </p>
               </div>
@@ -132,16 +132,15 @@
           >
             <div class="weather-card__detail">
               <v-icon
-                color="success"
                 icon="mdi-weather-windy"
                 size="small"
               />
               <div class="ml-2">
-                <p class="text-caption text-medium-emphasis">
+                <p class="text-caption font-weight-medium">
                   Wind
                 </p>
-                <p class="text-body-2 font-weight-medium">
-                  {{ Math.round(weather.wind.speed) }} m/s
+                <p class="text-body-2 font-weight-bold">
+                  {{ weather.wind.speed.toFixed(1) }} m/s
                 </p>
               </div>
             </div>
@@ -159,6 +158,7 @@
 </template>
 
 <script setup lang="ts">
+  import { computed } from 'vue'
   import type { TemperatureUnit, WeatherData } from '@/types/weather'
   import TemperatureDisplay from '@/components/atoms/TemperatureDisplay.vue'
   import WeatherIcon from '@/components/atoms/WeatherIcon.vue'
@@ -179,6 +179,39 @@
 
   const emit = defineEmits<Emits>()
 
+  const weatherConditionClass = computed(() => {
+    if (!props.weather.weather || props.weather.weather.length === 0) {
+      return ''
+    }
+    const icon = props.weather.weather[0].icon.slice(0, 2)
+    switch (icon) {
+      case '01': {
+        return 'weather-card--clear'
+      }
+      case '02':
+      case '03':
+      case '04': {
+        return 'weather-card--cloudy'
+      }
+      case '09':
+      case '10': {
+        return 'weather-card--rainy'
+      }
+      case '11': {
+        return 'weather-card--stormy'
+      }
+      case '13': {
+        return 'weather-card--snowy'
+      }
+      case '50': {
+        return 'weather-card--misty'
+      }
+      default: {
+        return ''
+      }
+    }
+  })
+
   const toggleFavorite = () => {
     emit('toggle-favorite', props.weather.name)
   }
@@ -193,6 +226,38 @@
 
 <style scoped lang="scss">
   .weather-card {
+    transition: all 0.3s ease-in-out;
+
+    &--clear {
+      background: linear-gradient(45deg, #2980b9, #6dd5fa);
+      color: white;
+    }
+
+    &--cloudy {
+      background: linear-gradient(45deg, #757f9a, #d7dde8);
+      color: #333;
+    }
+
+    &--rainy {
+      background: linear-gradient(45deg, #00416a, #799f0c, #e4e5e6);
+      color: white;
+    }
+
+    &--stormy {
+      background: linear-gradient(45deg, #141e30, #243b55);
+      color: white;
+    }
+
+    &--snowy {
+      background: linear-gradient(45deg, #e6dada, #274046);
+      color: white;
+    }
+
+    &--misty {
+      background: linear-gradient(45deg, #606c88, #3f4c6b);
+      color: white;
+    }
+
     &__header {
       display: flex;
       justify-content: space-between;
@@ -241,6 +306,33 @@
 
     &__footer {
       text-align: center;
+    }
+  }
+
+  // Theme adjustments for dark text on light cloudy background
+  .weather-card--cloudy {
+    .text-medium-emphasis {
+      color: rgba(0, 0, 0, 0.6) !important;
+    }
+    .v-icon {
+      color: #333 !important;
+    }
+  }
+
+  // Theme adjustments for light text on dark backgrounds
+  .weather-card--clear,
+  .weather-card--rainy,
+  .weather-card--stormy,
+  .weather-card--snowy,
+  .weather-card--misty {
+    .text-medium-emphasis {
+      color: rgba(255, 255, 255, 0.7) !important;
+    }
+    .v-icon {
+      color: white !important;
+    }
+    .v-divider {
+      border-color: rgba(255, 255, 255, 0.12);
     }
   }
 
