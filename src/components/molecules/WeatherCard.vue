@@ -18,7 +18,7 @@
           </p>
         </div>
 
-        <!-- Right side: Temperature and Icon -->
+        <!-- Right side: Temperature -->
         <div class="weather-card__temperature-section">
           <!-- Large temperature display -->
           <div class="weather-card__temperature">
@@ -28,16 +28,14 @@
               :unit="unit"
             />
           </div>
-          
-          <!-- Weather icon below temperature -->
-          <div class="weather-card__icon">
-            <WeatherIcon
-              :description="weather.weather[0].description"
-              :icon-code="weather.weather[0].icon"
-              size="2x"
-            />
-          </div>
         </div>
+      </div>
+
+      <!-- Weather description in lower left -->
+      <div class="weather-card__description">
+        <p class="text-caption text-capitalize">
+          {{ weather.weather[0].description }}
+        </p>
       </div>
 
       <!-- High/Low temperatures in bottom right -->
@@ -78,7 +76,6 @@
   import { computed } from 'vue'
   import { useRouter } from 'vue-router'
   import TemperatureDisplay from '@/components/atoms/TemperatureDisplay.vue'
-  import WeatherIcon from '@/components/atoms/WeatherIcon.vue'
 
   interface Props {
     weather: WeatherData
@@ -196,7 +193,6 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.5rem;
     }
 
     &__temperature {
@@ -204,9 +200,12 @@
       align-items: center;
     }
 
-    &__icon {
+    &__description {
       display: flex;
-      justify-content: center;
+      justify-content: flex-start;
+      align-items: center;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
     }
 
     &__high-low {
@@ -259,6 +258,10 @@
       &__temperature-section {
         align-items: center;
         width: 100%;
+      }
+
+      &__description {
+        justify-content: center;
       }
 
       &__high-low {
