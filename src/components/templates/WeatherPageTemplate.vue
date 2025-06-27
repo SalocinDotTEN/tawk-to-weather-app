@@ -100,18 +100,6 @@
               />
             </v-col>
           </v-row>
-          <!-- Forecast section -->
-          <v-row class="mt-6">
-            <v-col
-              cols="12"
-              lg="8"
-              md="10"
-              offset-lg="2"
-              offset-md="1"
-            >
-              <ForecastList :error="forecastError" :forecast="forecast" :loading="forecastLoading" :unit="unit" />
-            </v-col>
-          </v-row>
         </div>
         <!-- Empty state -->
         <div v-else-if="!loading" class="weather-page__empty">
@@ -181,25 +169,21 @@
 </template>
 
 <script setup lang="ts">
-  import type { ForecastData, LocationData, WeatherData } from '@/types/weather'
-  import { computed, ref } from 'vue'
+  import type { LocationData, WeatherData } from '@/types/weather'
+  import { ref } from 'vue'
   import ThemeToggle from '@/components/atoms/ThemeToggle.vue'
   import SearchBar from '@/components/molecules/SearchBar.vue'
   import WeatherCard from '@/components/molecules/WeatherCard.vue'
-  import ForecastList from '@/components/organisms/ForecastList.vue'
   import { TemperatureUnit } from '@/types/weather'
 
   interface Props {
     currentWeather: WeatherData | null
-    forecast: ForecastData | null
     favorites: string[]
     unit: TemperatureUnit
     loading?: boolean
     searchLoading?: boolean
     locationLoading?: boolean
-    forecastLoading?: boolean
     error?: string | null
-    forecastError?: string | null
     searchSuggestions?: LocationData[]
   }
 
@@ -218,9 +202,7 @@
     loading: false,
     searchLoading: false,
     locationLoading: false,
-    forecastLoading: false,
     error: null,
-    forecastError: null,
     searchSuggestions: () => [],
   })
 

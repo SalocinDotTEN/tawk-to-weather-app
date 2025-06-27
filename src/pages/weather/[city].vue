@@ -306,6 +306,24 @@
               </v-card>
             </v-col>
           </v-row>
+
+          <!-- Forecast section -->
+          <v-row class="mt-6">
+            <v-col
+              cols="12"
+              lg="8"
+              md="10"
+              offset-lg="2"
+              offset-md="1"
+            >
+              <ForecastList
+                :error="forecastError"
+                :forecast="forecastData"
+                :loading="forecastLoading"
+                :unit="unit"
+              />
+            </v-col>
+          </v-row>
         </div>
       </v-container>
     </v-main>
@@ -313,11 +331,12 @@
 </template>
 
 <script setup lang="ts">
-  import type { TemperatureUnit, WeatherData } from '@/types/weather'
+  import type { ForecastData, TemperatureUnit, WeatherData } from '@/types/weather'
   import { computed, onMounted, ref } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import TemperatureDisplay from '@/components/atoms/TemperatureDisplay.vue'
   import WeatherIcon from '@/components/atoms/WeatherIcon.vue'
+  import ForecastList from '@/components/organisms/ForecastList.vue'
   import { useWeatherStore } from '@/stores/weather'
   import { TemperatureUnit as TempUnit } from '@/types/weather'
 
@@ -326,8 +345,11 @@
   const weatherStore = useWeatherStore()
 
   const weatherData = ref<WeatherData | null>(null)
+  const forecastData = ref<ForecastData | null>(null)
   const loading = ref(false)
+  const forecastLoading = ref(false)
   const error = ref<string | null>(null)
+  const forecastError = ref<string | null>(null)
   const unit = ref<TemperatureUnit>(TempUnit.CELSIUS)
 
   const cityName = computed(() => {
@@ -394,6 +416,20 @@
     }
   }
 
+  const fetchForecastData = async () => {
+    try {
+      forecastLoading.value = true
+      forecastError.value = null
+      await weatherStore.fetchForecast(cityName.value)
+      forecastData.value = weatherStore.forecast
+    } catch (error_) {
+      forecastError.value = error_ instanceof Error ? error_.message : 'Failed to fetch forecast data'
+      console.error('Failed to fetch forecast data:', error_)
+    } finally {
+      forecastLoading.value = false
+    }
+  }
+
   const toggleFavorite = () => {
     if (isFavorite.value) {
       weatherStore.removeFromFavorites(cityName.value)
@@ -413,8 +449,11 @@
     router.back()
   }
 
-  onMounted(() => {
-    fetchWeatherData()
+  onMounted(async () => {
+    await Promise.all([
+      fetchWeatherData(),
+      fetchForecastData(),
+    ])
   })
 </script>
 

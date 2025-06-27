@@ -3,9 +3,6 @@
     :current-weather="weatherStore.currentWeather"
     :error="weatherStore.currentError"
     :favorites="weatherStore.favorites"
-    :forecast="weatherStore.forecast"
-    :forecast-error="forecastError"
-    :forecast-loading="forecastLoading"
     :loading="weatherStore.isLoading"
     :location-loading="locationLoading"
     :search-loading="searchLoading"
@@ -33,8 +30,6 @@
   // Local state for additional loading states
   const searchLoading = ref(false)
   const locationLoading = ref(false)
-  const forecastLoading = ref(false)
-  const forecastError = ref<string | null>(null)
   const searchSuggestions = ref<LocationData[]>([])
   const searchTimeout = ref<number | null>(null)
 
@@ -42,7 +37,6 @@
     try {
       searchLoading.value = true
       await weatherStore.fetchCurrentWeather(query)
-      await handleForecastSearch(query)
       // Clear search suggestions after successful search
       searchSuggestions.value = []
     } catch (error) {
@@ -67,7 +61,6 @@
     try {
       searchLoading.value = true
       await weatherStore.fetchCurrentWeatherByCoords(location.lat, location.lon)
-      await weatherStore.fetchForecastByCoords(location.lat, location.lon)
       // Clear search suggestions after selection
       searchSuggestions.value = []
     } catch (error) {
@@ -127,19 +120,6 @@
         searchSuggestions.value = []
       }
     }, 300)
-  }
-
-  const handleForecastSearch = async (query: string) => {
-    try {
-      forecastLoading.value = true
-      forecastError.value = null
-      await weatherStore.fetchForecast(query)
-    } catch (error) {
-      forecastError.value = error instanceof Error ? error.message : 'Failed to fetch forecast'
-      console.error('Forecast search failed:', error)
-    } finally {
-      forecastLoading.value = false
-    }
   }
 
   // Initialize with user's location on mount
