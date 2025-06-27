@@ -39,6 +39,9 @@
         </v-btn>
       </v-btn-toggle>
 
+      <!-- Theme toggle button -->
+      <ThemeToggle class="ml-2" />
+
       <!-- Refresh button -->
       <v-btn
         class="ml-2"
@@ -237,6 +240,7 @@
 <script setup lang="ts">
   import type { ForecastData, LocationData, WeatherData } from '@/types/weather'
   import { computed, ref } from 'vue'
+  import ThemeToggle from '@/components/atoms/ThemeToggle.vue'
   import SearchBar from '@/components/molecules/SearchBar.vue'
   import WeatherCard from '@/components/molecules/WeatherCard.vue'
   import ForecastList from '@/components/organisms/ForecastList.vue'
@@ -322,7 +326,6 @@
 <style scoped lang="scss">
   .weather-page {
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 
     &__main {
       background: transparent;

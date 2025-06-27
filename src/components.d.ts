@@ -16,6 +16,7 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     SearchBar: typeof import('./components/molecules/SearchBar.vue')['default']
     TemperatureDisplay: typeof import('./components/atoms/TemperatureDisplay.vue')['default']
+    ThemeToggle: typeof import('./components/atoms/ThemeToggle.vue')['default']
     WeatherCard: typeof import('./components/molecules/WeatherCard.vue')['default']
     WeatherIcon: typeof import('./components/atoms/WeatherIcon.vue')['default']
     WeatherPageTemplate: typeof import('./components/templates/WeatherPageTemplate.vue')['default']
