@@ -67,6 +67,12 @@
         <template #prepend>
           <v-icon icon="mdi-map-marker" />
         </template>
+        <template #append>
+          <v-tooltip activator="parent" location="top">
+            View detailed weather
+          </v-tooltip>
+          <v-icon color="grey-lighten-1" icon="mdi-arrow-right" size="small" />
+        </template>
       </v-list-item>
     </v-list>
   </v-form>
@@ -74,7 +80,7 @@
 
 <script setup lang="ts">
   import type { LocationData } from '@/types/weather'
-  import { computed, ref, watch } from 'vue'
+  import { ref, watch } from 'vue'
 
   interface Props {
     loading?: boolean

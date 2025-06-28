@@ -72,6 +72,19 @@
         <!-- Weather content -->
         <div v-if="currentWeather">
           <v-row>
+            <v-col
+              cols="12"
+              lg="8"
+              md="10"
+              offset-lg="2"
+              offset-md="1"
+            >
+              <h2 class="text-h6 font-weight-medium mb-3">
+                <v-icon class="mr-2" color="primary" icon="mdi-crosshairs-gps" /> Current Location
+              </h2>
+            </v-col>
+          </v-row>
+          <v-row>
             <!-- Current weather card -->
             <v-col
               cols="12"
@@ -82,7 +95,7 @@
             >
               <WeatherCard
                 :is-favorite="isFavorite(currentWeather.name)"
-                :show-favorite-button="false"
+                :show-favorite-button="true"
                 :unit="unit"
                 :weather="currentWeather"
                 @toggle-favorite="handleToggleFavorite"
@@ -144,6 +157,7 @@
             >
               <WeatherCard
                 :is-favorite="true"
+                :show-favorite-button="false"
                 :unit="unit"
                 :weather="weatherData"
                 @toggle-favorite="handleRemoveFavorite"

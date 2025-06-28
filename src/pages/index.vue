@@ -23,10 +23,12 @@
 <script setup lang="ts">
   import type { LocationData, TemperatureUnit } from '@/types/weather'
   import { onMounted, ref } from 'vue'
+  import { useRouter } from 'vue-router'
   import WeatherPageTemplate from '@/components/templates/WeatherPageTemplate.vue'
   import { useWeatherStore } from '@/stores/weather'
 
   const weatherStore = useWeatherStore()
+  const router = useRouter()
 
   // Local state for additional loading states
   const searchLoading = ref(false)
@@ -34,10 +36,15 @@
   const searchSuggestions = ref<LocationData[]>([])
   const searchTimeout = ref<number | null>(null)
 
+  const navigateToWeatherDetail = async (cityName: string) => {
+    await router.push(`/weather/${encodeURIComponent(cityName)}`)
+  }
+
   const handleSearch = async (query: string) => {
     try {
       searchLoading.value = true
-      await weatherStore.fetchCurrentWeather(query)
+      // Navigate to weather detail page instead of fetching weather data
+      await navigateToWeatherDetail(query)
       // Clear search suggestions after successful search
       searchSuggestions.value = []
     } catch (error) {
@@ -61,7 +68,8 @@
   const handleLocationSelect = async (location: LocationData) => {
     try {
       searchLoading.value = true
-      await weatherStore.fetchCurrentWeatherByCoords(location.lat, location.lon)
+      // Navigate to weather detail page instead of fetching weather data
+      await navigateToWeatherDetail(location.name)
       // Clear search suggestions after selection
       searchSuggestions.value = []
     } catch (error) {
