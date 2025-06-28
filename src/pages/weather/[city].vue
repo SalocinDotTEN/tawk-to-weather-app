@@ -28,15 +28,15 @@
         <!-- Navigation -->
         <div class="navigation">
           <v-btn
-            icon="mdi-chevron-left"
             color="white"
+            icon="mdi-chevron-left"
             variant="text"
             @click="goBack"
           />
           <h2 class="city-name">{{ weatherData.name }}, {{ weatherData.sys.country }}</h2>
           <v-btn
             color="white"
-            :icon="isFavorite ? 'mdi-heart' : 'mdi-plus'"
+            :icon="isFavorite ? 'mdi-trash-can-outline' : 'mdi-plus'"
             variant="text"
             @click="toggleFavorite"
           />
@@ -50,9 +50,9 @@
         <!-- Main weather display -->
         <div class="main-weather">
           <WeatherIcon
+            class="weather-icon"
             :description="weatherData.weather[0].description"
             :icon-code="weatherData.weather[0].icon"
-            class="weather-icon"
             size="4x"
           />
 
@@ -75,16 +75,16 @@
         <!-- Hourly Forecast -->
         <div class="forecast-section">
           <h3 class="section-title">Hourly Forecast</h3>
-          <div v-if="forecastData" class="hourly-forecast">
+          <div v-if="forecastData" class="hourly-forecast justify-center">
             <div
               v-for="(item, index) in getHourlyForecast()"
               :key="index"
-              class="hourly-item"
+              class="hourly-item flex-grow-1 flex-shrink-1"
             >
               <WeatherIcon
+                class="hourly-icon"
                 :description="item.weather[0].description"
                 :icon-code="item.weather[0].icon"
-                class="hourly-icon"
                 size="2x"
               />
               <div class="hourly-temp">{{ Math.round(item.main.temp) }}°</div>
@@ -104,9 +104,9 @@
             >
               <div class="weekly-left">
                 <WeatherIcon
+                  class="weekly-icon"
                   :description="item.weather[0].description"
                   :icon-code="item.weather[0].icon"
-                  class="weekly-icon"
                   size="2x"
                 />
                 <div class="weekly-info">
@@ -224,7 +224,7 @@
 
   const formatCondition = (description: string): string => {
     return description.split(' ').map(word =>
-      word.charAt(0).toUpperCase() + word.slice(1)
+      word.charAt(0).toUpperCase() + word.slice(1),
     ).join(' ')
   }
 
@@ -464,9 +464,5 @@
       gap: 0.5rem;
     }
 
-    .hourly-item {
-      min-width: 70px;
-      padding: 0.75rem 0.25rem;
-    }
   }
 </style>
