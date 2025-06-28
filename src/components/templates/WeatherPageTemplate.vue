@@ -1,34 +1,24 @@
 <template>
   <div class="weather-page">
-    <!-- Header with search and controls -->
-    <v-app-bar color="primary" density="comfortable" elevation="2">
-      <v-app-bar-title class="text-h6 font-weight-bold">
-        <v-icon class="mr-2" icon="mdi-weather-partly-cloudy" />
-      </v-app-bar-title>
-      <v-spacer />
-      <!-- Theme toggle button -->
-      <ThemeToggle class="ml-2" />
-      <!-- Refresh button -->
-      <v-btn
-        class="ml-2"
-        icon="mdi-refresh"
-        :loading="loading"
-        variant="text"
-        @click="handleRefresh"
-      />
-    </v-app-bar>
     <!-- Main content -->
     <v-main class="weather-page__main">
       <v-container class="py-6" fluid>
         <v-row class="mb-4">
           <v-col
-            cols="12"
-            lg="8"
-            md="10"
-            offset-lg="2"
-            offset-md="1"
+            cols="6"
+            lg="6"
+            md="12"
           >
             <h1 class="text-h4 font-weight-bold"> Weather </h1>
+          </v-col>
+          <v-col
+            class="text-right"
+            cols="6"
+            lg="6"
+            md="12"
+          >
+            <!-- Theme toggle button -->
+            <ThemeToggle class="ml-2" />
             <!-- Temperature unit toggle -->
             <v-btn-toggle
               v-model="selectedUnit"
@@ -41,6 +31,13 @@
               <v-btn size="small" value="metric"> °C </v-btn>
               <v-btn size="small" value="imperial"> °F </v-btn>
             </v-btn-toggle>
+            <v-btn
+              class="ml-2"
+              icon="mdi-refresh"
+              :loading="loading"
+              variant="text"
+              @click="handleRefresh"
+            />
           </v-col>
         </v-row>
         <!-- Search section -->
