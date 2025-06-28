@@ -9,6 +9,7 @@ export const useWeatherStore = defineStore('weather', () => {
   const currentWeather = ref<WeatherData | null>(null)
   const forecast = ref<ForecastData | null>(null)
   const favorites = ref<string[]>([])
+  const favoriteWeatherData = ref<WeatherData[]>([])
   const unit = ref<TemperatureUnit>(TemperatureUnit.CELSIUS)
   const loading = ref(false)
   const error = ref<string | null>(null)
@@ -36,6 +37,10 @@ export const useWeatherStore = defineStore('weather', () => {
 
   const setUnit = (newUnit: TemperatureUnit) => {
     unit.value = newUnit
+    // Refresh favorite weather data with new unit
+    if (favorites.value.length > 0) {
+      fetchFavoriteWeatherData()
+    }
   }
 
   const fetchCurrentWeather = async (city: string) => {
@@ -136,6 +141,8 @@ export const useWeatherStore = defineStore('weather', () => {
       favorites.value.push(city)
       // Save to localStorage
       localStorage.setItem('weather-favorites', JSON.stringify(favorites.value))
+      // Fetch weather data for the new favorite
+      fetchFavoriteWeatherData()
     }
   }
 
@@ -143,23 +150,27 @@ export const useWeatherStore = defineStore('weather', () => {
     const index = favorites.value.indexOf(city)
     if (index !== -1) {
       favorites.value.splice(index, 1)
+      // Remove from favorite weather data
+      favoriteWeatherData.value = favoriteWeatherData.value.filter(weather => weather.name !== city)
       // Save to localStorage
       localStorage.setItem('weather-favorites', JSON.stringify(favorites.value))
     }
   }
 
-  const isFavorite = (city: string) => {
-    return favorites.value.includes(city)
-  }
-
-  const loadFavorites = () => {
+  const fetchFavoriteWeatherData = async () => {
     try {
-      const saved = localStorage.getItem('weather-favorites')
-      if (saved) {
-        favorites.value = JSON.parse(saved)
-      }
+      const weatherPromises = favorites.value.map(city =>
+        weatherService.getCurrentWeather(city, unit.value),
+      )
+      const results = await Promise.allSettled(weatherPromises)
+
+      favoriteWeatherData.value = results
+        .filter((result): result is PromiseFulfilledResult<WeatherData> =>
+          result.status === 'fulfilled',
+        )
+        .map(result => result.value)
     } catch (error_) {
-      console.error('Failed to load favorites from localStorage:', error_)
+      console.error('Failed to fetch favorite weather data:', error_)
     }
   }
 
@@ -173,6 +184,23 @@ export const useWeatherStore = defineStore('weather', () => {
     }
   }
 
+  const isFavorite = (city: string) => {
+    return favorites.value.includes(city)
+  }
+
+  const loadFavorites = () => {
+    try {
+      const saved = localStorage.getItem('weather-favorites')
+      if (saved) {
+        favorites.value = JSON.parse(saved)
+        // Load weather data for favorites
+        fetchFavoriteWeatherData()
+      }
+    } catch (error_) {
+      console.error('Failed to load favorites from localStorage:', error_)
+    }
+  }
+
   // Initialize favorites from localStorage
   loadFavorites()
 
@@ -181,6 +209,7 @@ export const useWeatherStore = defineStore('weather', () => {
     currentWeather,
     forecast,
     favorites,
+    favoriteWeatherData,
     unit,
     loading,
     error,
@@ -204,6 +233,7 @@ export const useWeatherStore = defineStore('weather', () => {
     getCurrentLocation,
     addToFavorites,
     removeFromFavorites,
+    fetchFavoriteWeatherData,
     isFavorite,
     loadFavorites,
     refreshWeatherData,

@@ -91,6 +91,7 @@
             >
               <WeatherCard
                 :is-favorite="isFavorite(currentWeather.name)"
+                :show-favorite-button="false"
                 :unit="unit"
                 :weather="currentWeather"
                 @toggle-favorite="handleToggleFavorite"
@@ -126,37 +127,33 @@
           </v-row>
         </div>
         <!-- Favorites section -->
-        <div v-if="favorites.length > 0" class="weather-page__favorites mt-8">
+        <div v-if="favoriteWeatherData.length > 0" class="weather-page__favorites mt-8">
+          <v-row>
+            <v-col cols="12">
+              <h2 class="text-h5 font-weight-bold mb-4">
+                <v-icon
+                  class="mr-2"
+                  color="error"
+                  icon="mdi-heart"
+                />
+                Favorite Cities
+              </h2>
+            </v-col>
+          </v-row>
           <v-row>
             <v-col
+              v-for="weatherData in favoriteWeatherData"
+              :key="weatherData.name"
               cols="12"
-              lg="8"
-              md="10"
-              offset-lg="2"
-              offset-md="1"
+              lg="4"
+              sm="6"
             >
-              <v-card elevation="1" rounded="lg">
-                <v-card-title class="pb-2">
-                  <v-icon class="mr-2" icon="mdi-heart" /> Favorite Cities </v-card-title>
-                <v-card-text class="pa-0">
-                  <v-list density="compact">
-                    <v-list-item v-for="city in favorites" :key="city" :title="city" @click="handleSearch(city)">
-                      <template #prepend>
-                        <v-icon icon="mdi-map-marker" />
-                      </template>
-                      <template #append>
-                        <v-btn
-                          color="error"
-                          icon="mdi-heart-remove"
-                          size="small"
-                          variant="text"
-                          @click.stop="handleRemoveFavorite(city)"
-                        />
-                      </template>
-                    </v-list-item>
-                  </v-list>
-                </v-card-text>
-              </v-card>
+              <WeatherCard
+                :is-favorite="true"
+                :unit="unit"
+                :weather="weatherData"
+                @toggle-favorite="handleRemoveFavorite"
+              />
             </v-col>
           </v-row>
         </div>
@@ -176,6 +173,7 @@
   interface Props {
     currentWeather: WeatherData | null
     favorites: string[]
+    favoriteWeatherData?: WeatherData[]
     unit: TemperatureUnit
     loading?: boolean
     searchLoading?: boolean
@@ -201,6 +199,7 @@
     locationLoading: false,
     error: null,
     searchSuggestions: () => [],
+    favoriteWeatherData: () => [],
   })
 
   const emit = defineEmits<Emits>()

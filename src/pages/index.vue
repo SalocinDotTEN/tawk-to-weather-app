@@ -2,6 +2,7 @@
   <WeatherPageTemplate
     :current-weather="weatherStore.currentWeather"
     :error="weatherStore.currentError"
+    :favorite-weather-data="weatherStore.favoriteWeatherData"
     :favorites="weatherStore.favorites"
     :loading="weatherStore.isLoading"
     :location-loading="locationLoading"

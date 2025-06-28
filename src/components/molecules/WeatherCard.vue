@@ -56,11 +56,12 @@
         </span>
       </div>
 
-      <!-- Favorite button (optional - can be removed if not needed) -->
+      <!-- Favorite button (only show for favorites) -->
       <v-btn
+        v-if="isFavorite && showFavoriteButton"
         class="weather-card__favorite-btn"
-        :color="isFavorite ? 'error' : 'white'"
-        :icon="isFavorite ? 'mdi-heart' : 'mdi-heart-outline'"
+        color="error"
+        icon="mdi-heart-remove"
         size="small"
         variant="text"
         @click.stop="toggleFavorite"
@@ -79,6 +80,7 @@
     weather: WeatherData
     unit: TemperatureUnit
     isFavorite?: boolean
+    showFavoriteButton?: boolean
   }
 
   interface Emits {
@@ -87,6 +89,7 @@
 
   const props = withDefaults(defineProps<Props>(), {
     isFavorite: false,
+    showFavoriteButton: true,
   })
 
   const emit = defineEmits<Emits>()
