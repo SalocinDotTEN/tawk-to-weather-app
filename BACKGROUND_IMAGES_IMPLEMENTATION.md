@@ -1,7 +1,7 @@
 # Weather Card Background Images Implementation Summary
 
 ## Overview
-Successfully implemented dynamic background images for weather cards using the Unsplash API. Each weather card now displays a beautiful background image that matches the current weather condition.
+Successfully implemented dynamic background images for weather cards using the Unsplash API. Each weather card now displays a beautiful background image that matches the current weather condition, with proper attribution as required by Unsplash guidelines.
 
 ## Changes Made
 
@@ -12,8 +12,10 @@ Successfully implemented dynamic background images for weather cards using the U
 
 ### 2. Unsplash Service (`src/services/unsplashService.ts`)
 - **Created new service** to handle Unsplash API interactions
-- **Features**:
+- **Enhanced Features**:
   - Fetches weather-appropriate images based on weather conditions
+  - **NEW**: Returns complete attribution data including photographer info
+  - **NEW**: Includes proper UTM parameters for attribution links
   - Implements intelligent weather condition to search query mapping
   - Includes image caching to reduce API calls
   - Handles API errors gracefully with fallbacks
@@ -24,6 +26,14 @@ Successfully implemented dynamic background images for weather cards using the U
   - Dynamic background images loaded based on weather conditions
   - Semi-transparent overlay for text readability
   - Fallback to original gradient backgrounds if image loading fails
+- **NEW: Added proper Unsplash attribution**:
+  - Attribution displayed in bottom-left corner in smallest readable font
+  - Follows Unsplash attribution guidelines exactly
+  - Includes photographer name and profile link
+  - Includes Unsplash brand link
+  - Links include proper UTM parameters for tracking
+  - Attribution has text shadow for readability over images
+  - Responsive design that repositions attribution on mobile
 - **Improved styling**:
   - Enhanced text contrast for better readability over images
   - Maintained responsive design principles
@@ -35,6 +45,15 @@ Successfully implemented dynamic background images for weather cards using the U
 - **Provided setup instructions**: Clear steps for obtaining and configuring API keys
 
 ## Technical Implementation Details
+
+### Unsplash Attribution Compliance
+The implementation fully complies with Unsplash's attribution requirements:
+- **Format**: "Photo by [Photographer Name] on Unsplash"
+- **Links**: Both photographer and Unsplash links include proper UTM parameters
+- **UTM Parameters**: `?utm_source=tawk-to-weather-app&utm_medium=referral`
+- **Positioning**: Attribution placed in bottom-left corner in smallest readable font
+- **Accessibility**: Text shadow ensures readability over any background
+- **Click Prevention**: Attribution links don't trigger card navigation
 
 ### Weather Condition Mapping
 The service maps OpenWeatherMap conditions to appropriate Unsplash search queries:
@@ -49,17 +68,20 @@ The service maps OpenWeatherMap conditions to appropriate Unsplash search querie
 - Images are fetched with optimized dimensions (800x600 by default)
 - Uses Unsplash's URL parameters for cropping and sizing
 - Implements caching to prevent redundant API calls
+- Cache includes complete attribution data, not just image URLs
 
 ### Fallback Strategy
 - If Unsplash API key is not configured: Uses original gradient backgrounds
 - If API request fails: Falls back to gradient backgrounds
 - If no images found: Falls back to gradient backgrounds
+- Attribution only displays when Unsplash image is successfully loaded
 
 ### Accessibility & Performance
-- Maintains text readability with semi-transparent overlays
+- Maintains text readability with semi-transparent overlays and text shadows
 - Preserves all existing accessibility features
-- Implements efficient caching strategy
+- Implements efficient caching strategy for both images and attribution data
 - Graceful error handling without breaking the user experience
+- Attribution links open in new tabs and don't interfere with card navigation
 
 ## Setup Instructions for Users
 

@@ -1,10 +1,36 @@
 interface UnsplashPhoto {
+  id: string
   urls: {
     raw: string
     full: string
     regular: string
     small: string
     thumb: string
+  }
+  user: {
+    id: string
+    username: string
+    name: string
+    profile_image: {
+      small: string
+      medium: string
+      large: string
+    }
+    links: {
+      self: string
+      html: string
+      photos: string
+      likes: string
+      portfolio: string
+      following: string
+      followers: string
+    }
+  }
+  links: {
+    self: string
+    html: string
+    download: string
+    download_location: string
   }
   alt_description?: string
 }
@@ -13,23 +39,34 @@ interface UnsplashResponse {
   results: UnsplashPhoto[]
 }
 
+export interface WeatherImageData {
+  imageUrl: string
+  photographer: {
+    name: string
+    username: string
+    profileUrl: string
+  }
+  photoUrl: string
+}
+
 class UnsplashService {
   private readonly baseUrl = 'https://api.unsplash.com'
   private readonly accessKey = import.meta.env.VITE_UNSPLASH_ACCESS_KEY
-  private imageCache = new Map<string, string>()
+  private readonly appName = 'tawk-to-weather-app'
+  private imageCache = new Map<string, WeatherImageData>()
 
   /**
    * Get a background image URL for a weather condition
    * @param weatherCondition The weather condition (e.g., 'clear sky', 'rain', 'snow')
    * @param width Desired image width (default: 800)
    * @param height Desired image height (default: 600)
-   * @returns Promise resolving to image URL or null if not found
+   * @returns Promise resolving to WeatherImageData or null if not found
    */
   async getWeatherImage (
     weatherCondition: string,
     width = 800,
     height = 600,
-  ): Promise<string | null> {
+  ): Promise<WeatherImageData | null> {
     if (!this.accessKey) {
       console.warn('Unsplash access key not configured')
       return null
@@ -59,8 +96,16 @@ class UnsplashService {
 
       if (data.results && data.results.length > 0) {
         const photo = data.results[0]
-        // Return optimized URL with custom dimensions
-        return `${photo.urls.raw}&w=${width}&h=${height}&fit=crop&crop=center`
+        // Return complete weather image data with attribution
+        return {
+          imageUrl: `${photo.urls.raw}&w=${width}&h=${height}&fit=crop&crop=center`,
+          photographer: {
+            name: photo.user.name,
+            username: photo.user.username,
+            profileUrl: `${photo.user.links.html}?utm_source=${this.appName}&utm_medium=referral`,
+          },
+          photoUrl: `${photo.links.html}?utm_source=${this.appName}&utm_medium=referral`,
+        }
       }
 
       return null
@@ -78,20 +123,20 @@ class UnsplashService {
     weatherCondition: string,
     width = 800,
     height = 600,
-  ): Promise<string | null> {
+  ): Promise<WeatherImageData | null> {
     const cacheKey = `${weatherCondition}-${width}x${height}`
 
     if (this.imageCache.has(cacheKey)) {
       return this.imageCache.get(cacheKey) || null
     }
 
-    const imageUrl = await this.getWeatherImage(weatherCondition, width, height)
+    const imageData = await this.getWeatherImage(weatherCondition, width, height)
 
-    if (imageUrl) {
-      this.imageCache.set(cacheKey, imageUrl)
+    if (imageData) {
+      this.imageCache.set(cacheKey, imageData)
     }
 
-    return imageUrl
+    return imageData
   }
 
   /**

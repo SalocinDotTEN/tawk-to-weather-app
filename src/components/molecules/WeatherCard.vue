@@ -67,6 +67,31 @@
         variant="text"
         @click.stop="toggleFavorite"
       />
+
+      <!-- Unsplash attribution (only show when image is present) -->
+      <div
+        v-if="imageAttribution"
+        class="weather-card__attribution"
+      >
+        <span class="text-overline">
+          Photo by
+          <a
+            class="attribution-link"
+            :href="imageAttribution.photographer.profileUrl"
+            rel="noopener noreferrer"
+            target="_blank"
+            @click.stop
+          >{{ imageAttribution.photographer.name }}</a>
+          on
+          <a
+            class="attribution-link"
+            href="https://unsplash.com/?utm_source=tawk-to-weather-app&utm_medium=referral"
+            rel="noopener noreferrer"
+            target="_blank"
+            @click.stop
+          >Unsplash</a>
+        </span>
+      </div>
     </v-card-text>
   </v-card>
 </template>
@@ -76,7 +101,7 @@
   import { computed, onMounted, ref } from 'vue'
   import { useRouter } from 'vue-router'
   import TemperatureDisplay from '@/components/atoms/TemperatureDisplay.vue'
-  import { unsplashService } from '@/services/unsplashService'
+  import { unsplashService, type WeatherImageData } from '@/services/unsplashService'
 
   interface Props {
     weather: WeatherData
@@ -99,6 +124,7 @@
 
   // Reactive ref for background image
   const backgroundImage = ref<string | null>(null)
+  const imageAttribution = ref<WeatherImageData | null>(null)
 
   const weatherConditionClass = computed(() => {
     if (!props.weather.weather || props.weather.weather.length === 0) {
@@ -151,9 +177,10 @@
     if (props.weather.weather && props.weather.weather.length > 0) {
       const weatherCondition = props.weather.weather[0].description
       try {
-        const imageUrl = await unsplashService.getCachedWeatherImage(weatherCondition, 800, 600)
-        if (imageUrl) {
-          backgroundImage.value = imageUrl
+        const imageData = await unsplashService.getCachedWeatherImage(weatherCondition, 800, 600)
+        if (imageData) {
+          backgroundImage.value = imageData.imageUrl
+          imageAttribution.value = imageData
         }
       } catch (error) {
         console.warn('Failed to load weather background image:', error)
@@ -275,6 +302,35 @@
       right: 8px;
       z-index: 1;
     }
+
+    &__attribution {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      z-index: 3;
+      font-size: 0.6rem !important;
+      line-height: 0.8rem;
+      max-width: calc(100% - 16px);
+
+      .text-overline {
+        font-size: 0.6rem !important;
+        line-height: 0.8rem !important;
+        color: rgba(255, 255, 255, 0.8) !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+      }
+
+      .attribution-link {
+        color: rgba(255, 255, 255, 0.9) !important;
+        text-decoration: none;
+        font-weight: 500;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+
+        &:hover {
+          color: white !important;
+          text-decoration: underline;
+        }
+      }
+    }
   }
 
   // Theme adjustments for dark text on light cloudy background
@@ -320,6 +376,18 @@
 
       &__high-low {
         justify-content: center;
+      }
+
+      &__attribution {
+        position: relative;
+        bottom: unset;
+        left: unset;
+        margin-top: 0.5rem;
+        text-align: center;
+
+        .text-overline {
+          font-size: 0.55rem !important;
+        }
       }
     }
   }
