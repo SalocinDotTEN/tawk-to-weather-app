@@ -480,7 +480,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
-    background: #f8f9fa;
+    background: #D2DFFF;
     border-radius: 1rem;
   }
 
@@ -492,6 +492,14 @@
 
   .weekly-icon {
     flex-shrink: 0;
+    background-color: #98B4FD;
+    border-radius: 50%;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
   }
 
   .weekly-info {
