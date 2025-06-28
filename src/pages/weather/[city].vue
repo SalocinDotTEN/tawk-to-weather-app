@@ -33,13 +33,23 @@
             variant="text"
             @click="goBack"
           />
-          <h2 class="city-name">{{ weatherData.name }}, {{ weatherData.sys.country }}</h2>
-          <v-btn
-            color="white"
-            :icon="isFavorite ? 'mdi-trash-can-outline' : 'mdi-plus'"
-            variant="text"
-            @click="toggleFavorite"
-          />
+          <h2 class="city-name text-center">{{ weatherData.name }}, {{ weatherData.sys.country }}</h2>
+          <div class="navigation-actions">
+            <v-btn
+              class="mr-2"
+              color="white"
+              :icon="isDarkMode ? 'mdi-weather-sunny' : 'mdi-weather-night'"
+              :title="isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+              variant="text"
+              @click="toggleTheme"
+            />
+            <v-btn
+              color="white"
+              :icon="isFavorite ? 'mdi-trash-can-outline' : 'mdi-plus'"
+              variant="text"
+              @click="toggleFavorite"
+            />
+          </div>
         </div>
 
         <!-- Date -->
@@ -139,13 +149,17 @@
   import type { ForecastData, TemperatureUnit, WeatherData } from '@/types/weather'
   import { computed, onMounted, ref } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
+  import { useTheme } from 'vuetify'
   import WeatherIcon from '@/components/atoms/WeatherIcon.vue'
+  import { useAppStore } from '@/stores/app'
   import { useWeatherStore } from '@/stores/weather'
   import { TemperatureUnit as TempUnit } from '@/types/weather'
 
   const route = useRoute()
   const router = useRouter()
   const weatherStore = useWeatherStore()
+  const appStore = useAppStore()
+  const theme = useTheme()
 
   const weatherData = ref<WeatherData | null>(null)
   const forecastData = ref<ForecastData | null>(null)
@@ -165,6 +179,8 @@
   const isFavorite = computed(() => {
     return weatherStore.favorites.includes(cityName.value)
   })
+
+  const isDarkMode = computed(() => appStore.isDarkMode)
 
   const fetchWeatherData = async () => {
     try {
@@ -215,6 +231,11 @@
     } else {
       weatherStore.addToFavorites(cityName.value)
     }
+  }
+
+  const toggleTheme = () => {
+    appStore.toggleTheme()
+    theme.global.name.value = appStore.isDarkMode ? 'dark' : 'light'
   }
 
   const formatTime = (timestamp: number): string => {
@@ -326,12 +347,26 @@
     justify-content: space-between;
     align-items: center;
     padding: 1rem 0;
+    position: relative;
+  }
+
+  .navigation-actions {
+    display: flex;
+    align-items: center;
   }
 
   .city-name {
     font-size: 1.1rem;
     font-weight: 600;
     margin: 0;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: calc(100% - 140px);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    pointer-events: none;
   }
 
   .date {
@@ -491,6 +526,11 @@
   @media (max-width: 600px) {
     .weather-header {
       padding: 0 1rem 1.5rem;
+    }
+
+    .city-name {
+      font-size: 1rem;
+      max-width: calc(100% - 120px);
     }
 
     .temperature {
