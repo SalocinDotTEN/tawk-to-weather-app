@@ -4,19 +4,10 @@
     <v-main class="weather-page__main">
       <v-container class="py-6" fluid>
         <v-row class="mb-4">
-          <v-col
-            cols="6"
-            lg="6"
-            md="12"
-          >
+          <v-col cols="6" lg="6" md="12">
             <h1 class="text-h4 font-weight-bold"> Weather </h1>
           </v-col>
-          <v-col
-            class="text-right"
-            cols="6"
-            lg="6"
-            md="12"
-          >
+          <v-col class="text-right" cols="6" lg="6" md="12">
             <!-- Theme toggle button -->
             <ThemeToggle class="ml-2" />
             <!-- Temperature unit toggle -->
@@ -129,14 +120,15 @@
         <!-- Favorites section -->
         <div v-if="favoriteWeatherData.length > 0" class="weather-page__favorites mt-8">
           <v-row>
-            <v-col cols="12">
-              <h2 class="text-h5 font-weight-bold mb-4">
-                <v-icon
-                  class="mr-2"
-                  color="error"
-                  icon="mdi-heart"
-                />
-                Favorite Cities
+            <v-col
+              cols="12"
+              lg="8"
+              md="10"
+              offset-lg="2"
+              offset-md="1"
+            >
+              <h2 class="text-h5 font-weight-bold">
+                <v-icon class="mr-2" color="error" icon="mdi-heart" /> Favourite Cities
               </h2>
             </v-col>
           </v-row>
@@ -145,8 +137,10 @@
               v-for="weatherData in favoriteWeatherData"
               :key="weatherData.name"
               cols="12"
-              lg="4"
-              sm="6"
+              lg="8"
+              md="10"
+              offset-lg="2"
+              offset-md="1"
             >
               <WeatherCard
                 :is-favorite="true"
