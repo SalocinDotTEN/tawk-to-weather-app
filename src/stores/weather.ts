@@ -1,4 +1,4 @@
-import type { ForecastData, LocationData, WeatherData } from '@/types/weather'
+import type { FavoriteLocation, ForecastData, LocationData, WeatherData } from '@/types/weather'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import weatherService from '@/services/weatherService'
@@ -8,14 +8,30 @@ export const useWeatherStore = defineStore('weather', () => {
   // State
   const currentWeather = ref<WeatherData | null>(null)
   const forecast = ref<ForecastData | null>(null)
-  const favorites = ref<string[]>([])
+  const favorites = ref<FavoriteLocation[]>([])
   const favoriteWeatherData = ref<WeatherData[]>([])
   const unit = ref<TemperatureUnit>(TemperatureUnit.CELSIUS)
   const loading = ref(false)
   const error = ref<string | null>(null)
   const searchResults = ref<LocationData[]>([])
 
-  // Getters
+  // Helper function to create unique location ID
+  const createLocationId = (location: LocationData | FavoriteLocation): string => {
+    const name = location.name.toLowerCase().replace(/\s+/g, '-')
+    const state = location.state ? location.state.toLowerCase().replace(/\s+/g, '-') : ''
+    const country = location.country.toLowerCase().replace(/\s+/g, '-')
+    return `${name}-${state ? `${state}-` : ''}${country}-${location.lat.toFixed(4)}-${location.lon.toFixed(4)}`
+  }
+
+  // Helper function to create display name for location
+  const createLocationDisplayName = (location: FavoriteLocation): string => {
+    const parts = [location.name]
+    if (location.state) {
+      parts.push(location.state)
+    }
+    parts.push(location.country)
+    return parts.join(', ')
+  }
   const hasWeatherData = computed(() => currentWeather.value !== null)
   const hasForecastData = computed(() => forecast.value !== null)
   const isLoading = computed(() => loading.value)
@@ -136,9 +152,20 @@ export const useWeatherStore = defineStore('weather', () => {
     }
   }
 
-  const addToFavorites = (city: string) => {
-    if (!favorites.value.includes(city)) {
-      favorites.value.push(city)
+  const addToFavorites = (location: LocationData | FavoriteLocation) => {
+    const favoriteLocation: FavoriteLocation = {
+      name: location.name,
+      state: location.state,
+      country: location.country,
+      lat: location.lat,
+      lon: location.lon,
+      id: createLocationId(location),
+    }
+
+    // Check if location is already in favorites using unique ID
+    const existingIndex = favorites.value.findIndex(fav => fav.id === favoriteLocation.id)
+    if (existingIndex === -1) {
+      favorites.value.push(favoriteLocation)
       // Save to localStorage
       localStorage.setItem('weather-favorites', JSON.stringify(favorites.value))
       // Fetch weather data for the new favorite
@@ -146,21 +173,21 @@ export const useWeatherStore = defineStore('weather', () => {
     }
   }
 
-  const removeFromFavorites = (city: string) => {
-    const index = favorites.value.indexOf(city)
+  const removeFromFavorites = (locationId: string) => {
+    const index = favorites.value.findIndex(fav => fav.id === locationId)
     if (index !== -1) {
       favorites.value.splice(index, 1)
-      // Remove from favorite weather data
-      favoriteWeatherData.value = favoriteWeatherData.value.filter(weather => weather.name !== city)
       // Save to localStorage
       localStorage.setItem('weather-favorites', JSON.stringify(favorites.value))
+      // Re-fetch favorite weather data to ensure consistency
+      fetchFavoriteWeatherData()
     }
   }
 
   const fetchFavoriteWeatherData = async () => {
     try {
-      const weatherPromises = favorites.value.map(city =>
-        weatherService.getCurrentWeather(city, unit.value),
+      const weatherPromises = favorites.value.map(favorite =>
+        weatherService.getCurrentWeatherByCoords(favorite.lat, favorite.lon, unit.value),
       )
       const results = await Promise.allSettled(weatherPromises)
 
@@ -184,17 +211,39 @@ export const useWeatherStore = defineStore('weather', () => {
     }
   }
 
-  const isFavorite = (city: string) => {
-    return favorites.value.includes(city)
+  const isFavorite = (location: LocationData | string) => {
+    if (typeof location === 'string') {
+      // Legacy support - check by city name
+      return favorites.value.some(fav => fav.name === location)
+    }
+    // Check by location ID
+    const locationId = createLocationId(location)
+    return favorites.value.some(fav => fav.id === locationId)
+  }
+
+  const isFavoriteById = (locationId: string) => {
+    return favorites.value.some(fav => fav.id === locationId)
   }
 
   const loadFavorites = () => {
     try {
       const saved = localStorage.getItem('weather-favorites')
       if (saved) {
-        favorites.value = JSON.parse(saved)
-        // Load weather data for favorites
-        fetchFavoriteWeatherData()
+        const parsedFavorites = JSON.parse(saved)
+
+        // Handle migration from old string-based favorites to new location-based favorites
+        if (Array.isArray(parsedFavorites) && parsedFavorites.length > 0) {
+          if (typeof parsedFavorites[0] === 'string') {
+            // Old format - migrate to new format by clearing
+            console.log('Migrating old favorites format to new format')
+            favorites.value = []
+            localStorage.removeItem('weather-favorites')
+          } else {
+            favorites.value = parsedFavorites
+            // Load weather data for favorites
+            fetchFavoriteWeatherData()
+          }
+        }
       }
     } catch (error_) {
       console.error('Failed to load favorites from localStorage:', error_)
@@ -235,7 +284,10 @@ export const useWeatherStore = defineStore('weather', () => {
     removeFromFavorites,
     fetchFavoriteWeatherData,
     isFavorite,
+    isFavoriteById,
     loadFavorites,
     refreshWeatherData,
+    createLocationId,
+    createLocationDisplayName,
   }
 })

@@ -177,7 +177,19 @@
   })
 
   const isFavorite = computed(() => {
-    return weatherStore.favorites.includes(cityName.value)
+    if (weatherData.value) {
+      // Create location data from weather data to check favorites
+      const locationData = {
+        name: weatherData.value.name,
+        lat: weatherData.value.coord.lat,
+        lon: weatherData.value.coord.lon,
+        country: weatherData.value.sys.country,
+        state: undefined,
+      }
+      return weatherStore.isFavorite(locationData)
+    }
+    // Fallback to legacy city name check
+    return weatherStore.isFavorite(cityName.value)
   })
 
   const isDarkMode = computed(() => appStore.isDarkMode)
@@ -186,7 +198,17 @@
     try {
       loading.value = true
       error.value = null
-      await weatherStore.fetchCurrentWeather(cityName.value)
+
+      // Check if coordinates are provided in query parameters for more precise location
+      const lat = Number(route.query.lat)
+      const lon = Number(route.query.lon)
+
+      // Use coordinates for precise location or fall back to city name search
+      const hasValidCoords = lat && lon && !Number.isNaN(lat) && !Number.isNaN(lon)
+      await (hasValidCoords
+        ? weatherStore.fetchCurrentWeatherByCoords(lat, lon)
+        : weatherStore.fetchCurrentWeather(cityName.value))
+
       weatherData.value = weatherStore.currentWeather
       unit.value = weatherStore.currentUnit
     } catch (error_) {
@@ -201,7 +223,17 @@
     try {
       forecastLoading.value = true
       forecastError.value = null
-      await weatherStore.fetchForecast(cityName.value)
+
+      // Check if coordinates are provided in query parameters for more precise location
+      const lat = Number(route.query.lat)
+      const lon = Number(route.query.lon)
+
+      // Use coordinates for precise location or fall back to city name search
+      const hasValidCoords = lat && lon && !Number.isNaN(lat) && !Number.isNaN(lon)
+      await (hasValidCoords
+        ? weatherStore.fetchForecastByCoords(lat, lon)
+        : weatherStore.fetchForecast(cityName.value))
+
       forecastData.value = weatherStore.forecast
     } catch (error_) {
       forecastError.value = error_ instanceof Error ? error_.message : 'Failed to fetch forecast data'
@@ -226,10 +258,29 @@
   }
 
   const toggleFavorite = () => {
-    if (isFavorite.value) {
-      weatherStore.removeFromFavorites(cityName.value)
-    } else {
-      weatherStore.addToFavorites(cityName.value)
+    if (weatherData.value) {
+      if (isFavorite.value) {
+        // Create location data from weather data to find the correct ID
+        const locationData = {
+          name: weatherData.value.name,
+          lat: weatherData.value.coord.lat,
+          lon: weatherData.value.coord.lon,
+          country: weatherData.value.sys.country,
+          state: undefined,
+        }
+        const locationId = weatherStore.createLocationId(locationData)
+        weatherStore.removeFromFavorites(locationId)
+      } else {
+        // Add as favorite using weather data
+        const locationData = {
+          name: weatherData.value.name,
+          lat: weatherData.value.coord.lat,
+          lon: weatherData.value.coord.lon,
+          country: weatherData.value.sys.country,
+          state: undefined,
+        }
+        weatherStore.addToFavorites(locationData)
+      }
     }
   }
 

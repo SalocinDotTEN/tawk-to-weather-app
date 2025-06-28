@@ -129,10 +129,20 @@ export enum TemperatureUnit {
   KELVIN = 'standard',
 }
 
+export interface FavoriteLocation {
+  name: string
+  state?: string
+  country: string
+  lat: number
+  lon: number
+  // Create unique identifier for the location
+  id: string
+}
+
 export interface WeatherState {
   currentWeather: WeatherData | null
   forecast: ForecastData | null
-  favorites: string[]
+  favorites: FavoriteLocation[]
   unit: TemperatureUnit
   loading: boolean
   error: string | null

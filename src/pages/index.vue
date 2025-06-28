@@ -36,8 +36,11 @@
   const searchSuggestions = ref<LocationData[]>([])
   const searchTimeout = ref<number | null>(null)
 
-  const navigateToWeatherDetail = async (cityName: string) => {
-    await router.push(`/weather/${encodeURIComponent(cityName)}`)
+  const navigateToWeatherDetail = async (cityName: string, coords?: { lat: number, lon: number }) => {
+    const path = coords
+      ? `/weather/${encodeURIComponent(cityName)}?lat=${coords.lat}&lon=${coords.lon}`
+      : `/weather/${encodeURIComponent(cityName)}`
+    await router.push(path)
   }
 
   const handleSearch = async (query: string) => {
@@ -68,8 +71,8 @@
   const handleLocationSelect = async (location: LocationData) => {
     try {
       searchLoading.value = true
-      // Navigate to weather detail page instead of fetching weather data
-      await navigateToWeatherDetail(location.name)
+      // Navigate to weather detail page with coordinates for precise location
+      await navigateToWeatherDetail(location.name, { lat: location.lat, lon: location.lon })
       // Clear search suggestions after selection
       searchSuggestions.value = []
     } catch (error) {
@@ -79,16 +82,17 @@
     }
   }
 
-  const handleToggleFavorite = (city: string) => {
-    if (weatherStore.isFavorite(city)) {
-      weatherStore.removeFromFavorites(city)
+  const handleToggleFavorite = (location: LocationData) => {
+    if (weatherStore.isFavorite(location)) {
+      const locationId = weatherStore.createLocationId(location)
+      weatherStore.removeFromFavorites(locationId)
     } else {
-      weatherStore.addToFavorites(city)
+      weatherStore.addToFavorites(location)
     }
   }
 
-  const handleRemoveFavorite = (city: string) => {
-    weatherStore.removeFromFavorites(city)
+  const handleRemoveFavorite = (locationId: string) => {
+    weatherStore.removeFromFavorites(locationId)
   }
 
   const handleUnitChange = async (unit: TemperatureUnit) => {

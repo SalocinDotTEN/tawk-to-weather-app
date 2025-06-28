@@ -81,7 +81,7 @@
               offset-md="1"
             >
               <WeatherCard
-                :is-favorite="isFavorite(currentWeather.name)"
+                :is-favorite="isFavorite(currentWeather)"
                 :my-location="true"
                 :show-favorite-button="true"
                 :unit="unit"
@@ -148,7 +148,7 @@
                 :show-favorite-button="false"
                 :unit="unit"
                 :weather="weatherData"
-                @toggle-favorite="handleRemoveFavorite"
+                @toggle-favorite="(location) => handleRemoveFavoriteByLocation(location, weatherData)"
               />
             </v-col>
           </v-row>
@@ -159,7 +159,7 @@
 </template>
 
 <script setup lang="ts">
-  import type { LocationData, WeatherData } from '@/types/weather'
+  import type { FavoriteLocation, LocationData, WeatherData } from '@/types/weather'
   import { ref } from 'vue'
   import ThemeToggle from '@/components/atoms/ThemeToggle.vue'
   import SearchBar from '@/components/molecules/SearchBar.vue'
@@ -168,7 +168,7 @@
 
   interface Props {
     currentWeather: WeatherData | null
-    favorites: string[]
+    favorites: FavoriteLocation[]
     favoriteWeatherData?: WeatherData[]
     unit: TemperatureUnit
     loading?: boolean
@@ -176,17 +176,6 @@
     locationLoading?: boolean
     error?: string | null
     searchSuggestions?: LocationData[]
-  }
-
-  interface Emits {
-    (e: 'search', query: string): void
-    (e: 'location-search'): void
-    (e: 'select-location', location: LocationData): void
-    (e: 'toggle-favorite', city: string): void
-    (e: 'remove-favorite', city: string): void
-    (e: 'unit-change', unit: TemperatureUnit): void
-    (e: 'refresh'): void
-    (e: 'search-input', query: string): void
   }
 
   const props = withDefaults(defineProps<Props>(), {
@@ -198,7 +187,16 @@
     favoriteWeatherData: () => [],
   })
 
-  const emit = defineEmits<Emits>()
+  const emit = defineEmits([
+    'search',
+    'search-input',
+    'location-search',
+    'refresh',
+    'select-location',
+    'toggle-favorite',
+    'remove-favorite',
+    'unit-change',
+  ])
 
   const selectedUnit = ref(props.unit === TemperatureUnit.CELSIUS ? 'metric' : 'imperial')
 
@@ -214,12 +212,18 @@
     emit('select-location', location)
   }
 
-  const handleToggleFavorite = (city: string) => {
-    emit('toggle-favorite', city)
+  const handleToggleFavorite = (location: LocationData) => {
+    emit('toggle-favorite', location)
   }
 
-  const handleRemoveFavorite = (city: string) => {
-    emit('remove-favorite', city)
+  const handleRemoveFavorite = (locationId: string) => {
+    emit('remove-favorite', locationId)
+  }
+
+  const handleRemoveFavoriteByLocation = (location: LocationData, _weatherData: WeatherData) => {
+    // Find the matching favorite location and remove it by ID
+    const locationId = createLocationId(location)
+    handleRemoveFavorite(locationId)
   }
 
   const handleUnitChange = (value: string) => {
@@ -235,8 +239,24 @@
     emit('search-input', query)
   }
 
-  const isFavorite = (city: string): boolean => {
-    return props.favorites.includes(city)
+  const isFavorite = (weatherData: WeatherData): boolean => {
+    // Create location data from weather data to check if it's in favorites
+    const locationData = {
+      name: weatherData.name,
+      lat: weatherData.coord.lat,
+      lon: weatherData.coord.lon,
+      country: weatherData.sys.country,
+      state: undefined,
+    }
+    return props.favorites.some(fav => fav.id === createLocationId(locationData))
+  }
+
+  // Helper function to create location ID (should match store function)
+  const createLocationId = (location: LocationData): string => {
+    const name = location.name.toLowerCase().replace(/\s+/g, '-')
+    const state = location.state ? location.state.toLowerCase().replace(/\s+/g, '-') : ''
+    const country = location.country.toLowerCase().replace(/\s+/g, '-')
+    return `${name}-${state ? `${state}-` : ''}${country}-${location.lat.toFixed(4)}-${location.lon.toFixed(4)}`
   }
 </script>
 

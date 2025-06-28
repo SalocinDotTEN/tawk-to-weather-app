@@ -100,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-  import type { TemperatureUnit, WeatherData } from '@/types/weather'
+  import type { LocationData, TemperatureUnit, WeatherData } from '@/types/weather'
   import { computed, onMounted, ref } from 'vue'
   import { useRouter } from 'vue-router'
   import TemperatureDisplay from '@/components/atoms/TemperatureDisplay.vue'
@@ -115,7 +115,7 @@
   }
 
   interface Emits {
-    (e: 'toggle-favorite', city: string): void
+    (e: 'toggle-favorite', location: LocationData): void
   }
 
   const props = withDefaults(defineProps<Props>(), {
@@ -194,11 +194,22 @@
   })
 
   const toggleFavorite = () => {
-    emit('toggle-favorite', props.weather.name)
+    // Create location data from weather data
+    const locationData = {
+      name: props.weather.name,
+      lat: props.weather.coord.lat,
+      lon: props.weather.coord.lon,
+      country: props.weather.sys.country,
+      // State is not available in weather data, so we'll leave it undefined
+      state: undefined,
+    }
+    emit('toggle-favorite', locationData)
   }
 
   const navigateToDetails = () => {
-    router.push(`/weather/${encodeURIComponent(props.weather.name)}`)
+    // Include coordinates in the navigation for precise location
+    const coords = `?lat=${props.weather.coord.lat}&lon=${props.weather.coord.lon}`
+    router.push(`/weather/${encodeURIComponent(props.weather.name)}${coords}`)
   }
 </script>
 
