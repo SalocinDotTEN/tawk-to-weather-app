@@ -11,7 +11,10 @@
       <div class="weather-card__content">
         <!-- Left side: Location -->
         <div class="weather-card__location">
-          <h3 class="text-h6 font-weight-bold">
+          <h3 v-if="myLocation" class="text-h5 font-weight-bold">
+            My Location
+          </h3>
+          <h3 :class="(myLocation ? 'text-h6' : 'text-h5') + ' font-weight-bold'">
             {{ weather.name }}, {{ weather.sys.country }}
           </h3>
         </div>
@@ -108,6 +111,7 @@
     unit: TemperatureUnit
     isFavorite?: boolean
     showFavoriteButton?: boolean
+    myLocation?: boolean
   }
 
   interface Emits {
@@ -117,6 +121,7 @@
   const props = withDefaults(defineProps<Props>(), {
     isFavorite: false,
     showFavoriteButton: true,
+    myLocation: false,
   })
 
   const emit = defineEmits<Emits>()
