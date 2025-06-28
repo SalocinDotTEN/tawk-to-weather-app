@@ -4,6 +4,7 @@
     :class="weatherConditionClass"
     elevation="2"
     rounded="xl"
+    :style="cardStyle"
     @click="navigateToDetails"
   >
     <v-card-text class="pa-4 text-white">
@@ -72,9 +73,10 @@
 
 <script setup lang="ts">
   import type { TemperatureUnit, WeatherData } from '@/types/weather'
-  import { computed } from 'vue'
+  import { computed, onMounted, ref } from 'vue'
   import { useRouter } from 'vue-router'
   import TemperatureDisplay from '@/components/atoms/TemperatureDisplay.vue'
+  import { unsplashService } from '@/services/unsplashService'
 
   interface Props {
     weather: WeatherData
@@ -94,6 +96,9 @@
 
   const emit = defineEmits<Emits>()
   const router = useRouter()
+
+  // Reactive ref for background image
+  const backgroundImage = ref<string | null>(null)
 
   const weatherConditionClass = computed(() => {
     if (!props.weather.weather || props.weather.weather.length === 0) {
@@ -128,6 +133,34 @@
     }
   })
 
+  // Computed style for the card with background image
+  const cardStyle = computed(() => {
+    if (backgroundImage.value) {
+      return {
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${backgroundImage.value})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }
+    }
+    return {}
+  })
+
+  // Load background image when component mounts
+  onMounted(async () => {
+    if (props.weather.weather && props.weather.weather.length > 0) {
+      const weatherCondition = props.weather.weather[0].description
+      try {
+        const imageUrl = await unsplashService.getCachedWeatherImage(weatherCondition, 800, 600)
+        if (imageUrl) {
+          backgroundImage.value = imageUrl
+        }
+      } catch (error) {
+        console.warn('Failed to load weather background image:', error)
+      }
+    }
+  })
+
   const toggleFavorite = () => {
     emit('toggle-favorite', props.weather.name)
   }
@@ -142,10 +175,30 @@
     transition: all 0.3s ease-in-out;
     cursor: pointer;
     position: relative;
+    overflow: hidden;
 
     &:hover {
       transform: translateY(-2px);
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    // When background image is present, ensure text is always readable
+    &[style*="background-image"] {
+      color: white !important;
+
+      .v-card-text {
+        position: relative;
+        z-index: 2;
+      }
+
+      // Ensure all text is white when background image is present
+      * {
+        color: white !important;
+      }
+
+      .text-caption {
+        color: rgba(255, 255, 255, 0.9) !important;
+      }
     }
 
     &--clear {

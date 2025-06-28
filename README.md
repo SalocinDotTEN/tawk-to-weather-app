@@ -6,6 +6,7 @@ A modern, responsive weather application built with Vue.js 3, TypeScript, and Vu
 
 - **Current Weather**: Get real-time weather information for any city
 - **5-Day Forecast**: View detailed weather forecasts
+- **Dynamic Background Images**: Weather cards display beautiful background images matching weather conditions (powered by Unsplash)
 - **Location Services**: Use GPS to get weather for your current location
 - **Search with Autocomplete**: Smart city search with suggestions
 - **Favorites**: Save and manage favorite cities
@@ -71,9 +72,10 @@ src/components/
    cp .env.example .env
    ```
    
-   Edit `.env` and add your OpenWeatherMap API key:
+   Edit `.env` and add your API keys:
    ```
-   VITE_OPENWEATHER_API_KEY=your_actual_api_key_here
+   VITE_OPENWEATHER_API_KEY=your_openweather_api_key_here
+   VITE_UNSPLASH_ACCESS_KEY=your_unsplash_access_key_here
    ```
 
 4. **Start the development server**
@@ -84,12 +86,22 @@ src/components/
 5. **Open your browser**
    Navigate to `http://localhost:5173`
 
-### Getting an API Key
+### Getting API Keys
 
+#### OpenWeatherMap API
 1. Visit [OpenWeatherMap](https://openweathermap.org/api)
 2. Sign up for a free account
 3. Generate an API key
-4. Add the key to your `.env` file
+4. Add the key to your `.env` file as `VITE_OPENWEATHER_API_KEY`
+
+#### Unsplash API (for weather background images)
+1. Visit [Unsplash Developers](https://unsplash.com/developers)
+2. Sign up for a free account
+3. Create a new application
+4. Copy the "Access Key" 
+5. Add the key to your `.env` file as `VITE_UNSPLASH_ACCESS_KEY`
+
+**Note**: The Unsplash API is optional. If not configured, weather cards will use the default gradient backgrounds.
 
 ## 🛠️ Development
 
