@@ -1,5 +1,5 @@
 <template>
-  <div class="weather-detail-page">
+  <div class="weather-detail-page" :class="{ 'theme--dark': isDarkMode }">
     <!-- Loading state -->
     <div v-if="loading" class="loading-container">
       <v-progress-circular
@@ -305,6 +305,11 @@
   .weather-detail-page {
     min-height: 100vh;
     background: #f5f5f5;
+    transition: background-color 0.3s ease;
+  }
+
+  .theme--dark .weather-detail-page {
+    background: #121212;
   }
 
   .loading-container,
@@ -422,6 +427,11 @@
     position: relative;
     z-index: 1;
     padding: 1.5rem;
+    transition: background-color 0.3s ease;
+  }
+
+  .theme--dark .weather-content {
+    background: #1e1e1e;
   }
 
   .forecast-section {
@@ -433,6 +443,11 @@
     font-weight: 600;
     color: #333;
     margin-bottom: 1rem;
+    transition: color 0.3s ease;
+  }
+
+  .theme--dark .section-title {
+    color: #e0e0e0;
   }
 
   .hourly-forecast {
@@ -451,6 +466,11 @@
     background: #f8f9fa;
     border-radius: 1rem;
     text-align: center;
+    transition: background-color 0.3s ease;
+  }
+
+  .theme--dark .hourly-item {
+    background: #2a2a2a;
   }
 
   .hourly-icon {
@@ -462,11 +482,21 @@
     font-weight: 600;
     color: #333;
     margin-bottom: 0.25rem;
+    transition: color 0.3s ease;
+  }
+
+  .theme--dark .hourly-temp {
+    color: #e0e0e0;
   }
 
   .hourly-time {
     font-size: 0.8rem;
     color: #666;
+    transition: color 0.3s ease;
+  }
+
+  .theme--dark .hourly-time {
+    color: #a0a0a0;
   }
 
   .weekly-forecast {
@@ -482,6 +512,11 @@
     padding: 1rem;
     background: #D2DFFF;
     border-radius: 1rem;
+    transition: background-color 0.3s ease;
+  }
+
+  .theme--dark .weekly-item {
+    background: #2a2a3a;
   }
 
   .weekly-left {
@@ -500,6 +535,11 @@
     justify-content: center;
     width: 60px;
     height: 60px;
+    transition: background-color 0.3s ease;
+  }
+
+  .theme--dark .weekly-icon {
+    background-color: #7A9BFF;
   }
 
   .weekly-info {
@@ -511,11 +551,21 @@
     font-size: 1rem;
     font-weight: 600;
     color: #333;
+    transition: color 0.3s ease;
+  }
+
+  .theme--dark .weekly-day {
+    color: #e0e0e0;
   }
 
   .weekly-condition {
     font-size: 0.9rem;
     color: #666;
+    transition: color 0.3s ease;
+  }
+
+  .theme--dark .weekly-condition {
+    color: #a0a0a0;
   }
 
   .weekly-right {
@@ -528,6 +578,11 @@
     font-size: 1rem;
     font-weight: 600;
     color: #333;
+    transition: color 0.3s ease;
+  }
+
+  .theme--dark .weekly-temp {
+    color: #e0e0e0;
   }
 
   // Mobile responsiveness
