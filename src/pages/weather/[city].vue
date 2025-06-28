@@ -66,6 +66,15 @@
 
           <div class="last-update">
             Last Update {{ formatTime(weatherData.dt) }}
+            <v-btn
+              class="refresh-btn ml-2"
+              color="white"
+              icon="mdi-refresh"
+              :loading="refreshLoading"
+              size="small"
+              variant="text"
+              @click="handleRefresh"
+            />
           </div>
         </div>
       </div>
@@ -142,6 +151,7 @@
   const forecastData = ref<ForecastData | null>(null)
   const loading = ref(false)
   const forecastLoading = ref(false)
+  const refreshLoading = ref(false)
   const error = ref<string | null>(null)
   const forecastError = ref<string | null>(null)
   const unit = ref<TemperatureUnit>(TempUnit.CELSIUS)
@@ -182,6 +192,20 @@
       console.error('Failed to fetch forecast data:', error_)
     } finally {
       forecastLoading.value = false
+    }
+  }
+
+  const handleRefresh = async () => {
+    try {
+      refreshLoading.value = true
+      await Promise.all([
+        fetchWeatherData(),
+        fetchForecastData(),
+      ])
+    } catch (error_) {
+      console.error('Refresh failed:', error_)
+    } finally {
+      refreshLoading.value = false
     }
   }
 
@@ -341,6 +365,19 @@
   .last-update {
     font-size: 0.9rem;
     opacity: 0.8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .refresh-btn {
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 
   .weather-content {
