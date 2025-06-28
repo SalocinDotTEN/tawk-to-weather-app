@@ -19,7 +19,6 @@ declare module 'vue-router/auto-routes' {
    */
   export interface RouteNamedMap {
     '/': RouteRecordInfo<'/', '/', Record<never, never>, Record<never, never>>,
-    '/weather': RouteRecordInfo<'/weather', '/weather', Record<never, never>, Record<never, never>>,
     '/weather/[city]': RouteRecordInfo<'/weather/[city]', '/weather/:city', { city: ParamValue<true> }, { city: ParamValue<false> }>,
   }
 }

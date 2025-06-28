@@ -1,332 +1,128 @@
 <template>
   <div class="weather-detail-page">
-    <v-main class="pt-16">
-      <v-container>
-        <!-- Back button -->
-        <v-row class="mb-4">
-          <v-col cols="12">
-            <v-btn
-              prepend-icon="mdi-arrow-left"
-              variant="text"
-              @click="goBack"
-            >
-              Back
-            </v-btn>
-          </v-col>
-        </v-row>
+    <!-- Loading state -->
+    <div v-if="loading" class="loading-container">
+      <v-progress-circular
+        color="primary"
+        indeterminate
+        size="64"
+      />
+      <p class="mt-4">Loading weather details...</p>
+    </div>
 
-        <!-- Loading state -->
-        <div v-if="loading" class="text-center">
-          <v-progress-circular
-            color="primary"
-            indeterminate
-            size="64"
+    <!-- Error state -->
+    <div v-else-if="error" class="error-container">
+      <v-alert
+        color="error"
+        icon="mdi-alert-circle"
+        variant="tonal"
+      >
+        {{ error }}
+      </v-alert>
+    </div>
+
+    <!-- Weather details -->
+    <div v-else-if="weatherData" class="weather-detail-container">
+      <!-- Header Section -->
+      <div class="weather-header">
+        <!-- Navigation -->
+        <div class="navigation">
+          <v-btn
+            icon="mdi-chevron-left"
+            color="white"
+            variant="text"
+            @click="goBack"
           />
-          <p class="mt-4">Loading weather details...</p>
+          <h2 class="city-name">{{ weatherData.name }}, {{ weatherData.sys.country }}</h2>
+          <v-btn
+            color="white"
+            :icon="isFavorite ? 'mdi-heart' : 'mdi-plus'"
+            variant="text"
+            @click="toggleFavorite"
+          />
         </div>
 
-        <!-- Error state -->
-        <div v-else-if="error" class="text-center">
-          <v-alert
-            color="error"
-            icon="mdi-alert-circle"
-            variant="tonal"
-          >
-            {{ error }}
-          </v-alert>
+        <!-- Date -->
+        <div class="date">
+          {{ formatDate(weatherData.dt) }}
         </div>
 
-        <!-- Weather details -->
-        <div v-else-if="weatherData">
-          <v-row>
-            <v-col
-              cols="12"
-              lg="8"
-              md="10"
-              offset-lg="2"
-              offset-md="1"
+        <!-- Main weather display -->
+        <div class="main-weather">
+          <WeatherIcon
+            :description="weatherData.weather[0].description"
+            :icon-code="weatherData.weather[0].icon"
+            class="weather-icon"
+            size="4x"
+          />
+
+          <div class="temperature">
+            {{ Math.round(weatherData.main.temp) }}° C
+          </div>
+
+          <div class="condition">
+            {{ formatCondition(weatherData.weather[0].description) }}
+          </div>
+
+          <div class="last-update">
+            Last Update {{ formatTime(weatherData.dt) }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Section -->
+      <div class="weather-content">
+        <!-- Hourly Forecast -->
+        <div class="forecast-section">
+          <h3 class="section-title">Hourly Forecast</h3>
+          <div v-if="forecastData" class="hourly-forecast">
+            <div
+              v-for="(item, index) in getHourlyForecast()"
+              :key="index"
+              class="hourly-item"
             >
-              <!-- Main weather card with full details -->
-              <v-card
-                class="weather-detail-card"
-                :class="weatherConditionClass"
-                elevation="4"
-                rounded="xl"
-              >
-                <v-card-text class="pa-6">
-                  <!-- Header -->
-                  <div class="weather-detail__header">
-                    <div class="weather-detail__location">
-                      <h1 class="text-h4 font-weight-bold">
-                        {{ weatherData.name }}
-                      </h1>
-                      <p class="text-h6 text-medium-emphasis">
-                        {{ weatherData.sys.country }}
-                      </p>
-                    </div>
-                    <v-btn
-                      :color="isFavorite ? 'error' : 'white'"
-                      :icon="isFavorite ? 'mdi-heart' : 'mdi-heart-outline'"
-                      size="large"
-                      variant="text"
-                      @click="toggleFavorite"
-                    />
-                  </div>
-
-                  <!-- Main weather display -->
-                  <div class="weather-detail__main mt-6">
-                    <div class="weather-detail__temperature-section">
-                      <TemperatureDisplay
-                        size="xl"
-                        :temperature="weatherData.main.temp"
-                        :unit="unit"
-                      />
-                      <div class="weather-detail__feels-like mt-2">
-                        <span class="text-h6 text-medium-emphasis">
-                          Feels like
-                        </span>
-                        <TemperatureDisplay
-                          size="medium"
-                          :temperature="weatherData.main.feels_like"
-                          :unit="unit"
-                          variant="muted"
-                        />
-                      </div>
-                    </div>
-
-                    <div class="weather-detail__icon-section">
-                      <WeatherIcon
-                        :description="weatherData.weather[0].description"
-                        :icon-code="weatherData.weather[0].icon"
-                        size="4x"
-                      />
-                      <p class="text-h6 text-center text-capitalize mt-3">
-                        {{ weatherData.weather[0].description }}
-                      </p>
-                    </div>
-                  </div>
-
-                  <v-divider class="my-6" />
-
-                  <!-- Detailed weather information -->
-                  <div class="weather-detail__details">
-                    <v-row>
-                      <v-col cols="6" md="3" sm="4">
-                        <div class="weather-detail__detail">
-                          <v-icon
-                            icon="mdi-thermometer-high"
-                            size="large"
-                          />
-                          <div class="ml-3">
-                            <p class="text-body-1 font-weight-medium">
-                              High
-                            </p>
-                            <TemperatureDisplay
-                              size="medium"
-                              :temperature="weatherData.main.temp_max"
-                              :unit="unit"
-                              variant="strong"
-                            />
-                          </div>
-                        </div>
-                      </v-col>
-
-                      <v-col cols="6" md="3" sm="4">
-                        <div class="weather-detail__detail">
-                          <v-icon
-                            icon="mdi-thermometer-low"
-                            size="large"
-                          />
-                          <div class="ml-3">
-                            <p class="text-body-1 font-weight-medium">
-                              Low
-                            </p>
-                            <TemperatureDisplay
-                              size="medium"
-                              :temperature="weatherData.main.temp_min"
-                              :unit="unit"
-                              variant="strong"
-                            />
-                          </div>
-                        </div>
-                      </v-col>
-
-                      <v-col cols="6" md="3" sm="4">
-                        <div class="weather-detail__detail">
-                          <v-icon
-                            icon="mdi-water-percent"
-                            size="large"
-                          />
-                          <div class="ml-3">
-                            <p class="text-body-1 font-weight-medium">
-                              Humidity
-                            </p>
-                            <p class="text-h6 font-weight-bold">
-                              {{ weatherData.main.humidity }}%
-                            </p>
-                          </div>
-                        </div>
-                      </v-col>
-
-                      <v-col cols="6" md="3" sm="4">
-                        <div class="weather-detail__detail">
-                          <v-icon
-                            icon="mdi-weather-windy"
-                            size="large"
-                          />
-                          <div class="ml-3">
-                            <p class="text-body-1 font-weight-medium">
-                              Wind
-                            </p>
-                            <p class="text-h6 font-weight-bold">
-                              {{ weatherData.wind.speed.toFixed(1) }} m/s
-                            </p>
-                          </div>
-                        </div>
-                      </v-col>
-
-                      <v-col cols="6" md="3" sm="4">
-                        <div class="weather-detail__detail">
-                          <v-icon
-                            icon="mdi-gauge"
-                            size="large"
-                          />
-                          <div class="ml-3">
-                            <p class="text-body-1 font-weight-medium">
-                              Pressure
-                            </p>
-                            <p class="text-h6 font-weight-bold">
-                              {{ weatherData.main.pressure }} hPa
-                            </p>
-                          </div>
-                        </div>
-                      </v-col>
-
-                      <v-col cols="6" md="3" sm="4">
-                        <div class="weather-detail__detail">
-                          <v-icon
-                            icon="mdi-eye"
-                            size="large"
-                          />
-                          <div class="ml-3">
-                            <p class="text-body-1 font-weight-medium">
-                              Visibility
-                            </p>
-                            <p class="text-h6 font-weight-bold">
-                              {{ (weatherData.visibility / 1000).toFixed(1) }} km
-                            </p>
-                          </div>
-                        </div>
-                      </v-col>
-
-                      <v-col cols="6" md="3" sm="4">
-                        <div class="weather-detail__detail">
-                          <v-icon
-                            icon="mdi-weather-sunny"
-                            size="large"
-                          />
-                          <div class="ml-3">
-                            <p class="text-body-1 font-weight-medium">
-                              UV Index
-                            </p>
-                            <p class="text-h6 font-weight-bold">
-                              {{ uvIndex }}
-                            </p>
-                          </div>
-                        </div>
-                      </v-col>
-
-                      <v-col cols="6" md="3" sm="4">
-                        <div class="weather-detail__detail">
-                          <v-icon
-                            icon="mdi-cloud"
-                            size="large"
-                          />
-                          <div class="ml-3">
-                            <p class="text-body-1 font-weight-medium">
-                              Cloudiness
-                            </p>
-                            <p class="text-h6 font-weight-bold">
-                              {{ weatherData.clouds.all }}%
-                            </p>
-                          </div>
-                        </div>
-                      </v-col>
-                    </v-row>
-                  </div>
-
-                  <!-- Sun times -->
-                  <v-divider class="my-6" />
-
-                  <div class="weather-detail__sun-times">
-                    <v-row>
-                      <v-col cols="6">
-                        <div class="weather-detail__detail">
-                          <v-icon
-                            icon="mdi-weather-sunset-up"
-                            size="large"
-                          />
-                          <div class="ml-3">
-                            <p class="text-body-1 font-weight-medium">
-                              Sunrise
-                            </p>
-                            <p class="text-h6 font-weight-bold">
-                              {{ formatTime(weatherData.sys.sunrise) }}
-                            </p>
-                          </div>
-                        </div>
-                      </v-col>
-
-                      <v-col cols="6">
-                        <div class="weather-detail__detail">
-                          <v-icon
-                            icon="mdi-weather-sunset-down"
-                            size="large"
-                          />
-                          <div class="ml-3">
-                            <p class="text-body-1 font-weight-medium">
-                              Sunset
-                            </p>
-                            <p class="text-h6 font-weight-bold">
-                              {{ formatTime(weatherData.sys.sunset) }}
-                            </p>
-                          </div>
-                        </div>
-                      </v-col>
-                    </v-row>
-                  </div>
-
-                  <!-- Footer -->
-                  <div class="weather-detail__footer mt-6 text-center">
-                    <p class="text-body-1 text-medium-emphasis">
-                      Last updated: {{ formatTime(weatherData.dt) }}
-                    </p>
-                  </div>
-                </v-card-text>
-              </v-card>
-            </v-col>
-          </v-row>
-
-          <!-- Forecast section -->
-          <v-row class="mt-6">
-            <v-col
-              cols="12"
-              lg="8"
-              md="10"
-              offset-lg="2"
-              offset-md="1"
-            >
-              <ForecastList
-                :error="forecastError"
-                :forecast="forecastData"
-                :loading="forecastLoading"
-                :unit="unit"
+              <WeatherIcon
+                :description="item.weather[0].description"
+                :icon-code="item.weather[0].icon"
+                class="hourly-icon"
+                size="2x"
               />
-            </v-col>
-          </v-row>
+              <div class="hourly-temp">{{ Math.round(item.main.temp) }}°</div>
+              <div class="hourly-time">{{ formatHourlyTime(item.dt) }}</div>
+            </div>
+          </div>
         </div>
-      </v-container>
-    </v-main>
+
+        <!-- Weekly Forecast -->
+        <div class="forecast-section">
+          <h3 class="section-title">Weekly Forecast</h3>
+          <div v-if="forecastData" class="weekly-forecast">
+            <div
+              v-for="(item, index) in getWeeklyForecast()"
+              :key="index"
+              class="weekly-item"
+            >
+              <div class="weekly-left">
+                <WeatherIcon
+                  :description="item.weather[0].description"
+                  :icon-code="item.weather[0].icon"
+                  class="weekly-icon"
+                  size="2x"
+                />
+                <div class="weekly-info">
+                  <div class="weekly-day">{{ formatWeekDay(item.dt) }}</div>
+                  <div class="weekly-condition">{{ formatCondition(item.weather[0].description) }}</div>
+                </div>
+              </div>
+              <div class="weekly-right">
+                <div class="weekly-temp">{{ Math.round(item.main.temp) }}° C</div>
+                <v-icon icon="mdi-chevron-right" size="small" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -334,9 +130,7 @@
   import type { ForecastData, TemperatureUnit, WeatherData } from '@/types/weather'
   import { computed, onMounted, ref } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
-  import TemperatureDisplay from '@/components/atoms/TemperatureDisplay.vue'
   import WeatherIcon from '@/components/atoms/WeatherIcon.vue'
-  import ForecastList from '@/components/organisms/ForecastList.vue'
   import { useWeatherStore } from '@/stores/weather'
   import { TemperatureUnit as TempUnit } from '@/types/weather'
 
@@ -360,45 +154,6 @@
 
   const isFavorite = computed(() => {
     return weatherStore.favorites.includes(cityName.value)
-  })
-
-  const weatherConditionClass = computed(() => {
-    if (!weatherData.value?.weather || weatherData.value.weather.length === 0) {
-      return ''
-    }
-    const icon = weatherData.value.weather[0].icon.slice(0, 2)
-    switch (icon) {
-      case '01': {
-        return 'weather-detail-card--clear'
-      }
-      case '02':
-      case '03':
-      case '04': {
-        return 'weather-detail-card--cloudy'
-      }
-      case '09':
-      case '10': {
-        return 'weather-detail-card--rainy'
-      }
-      case '11': {
-        return 'weather-detail-card--stormy'
-      }
-      case '13': {
-        return 'weather-detail-card--snowy'
-      }
-      case '50': {
-        return 'weather-detail-card--misty'
-      }
-      default: {
-        return ''
-      }
-    }
-  })
-
-  const uvIndex = computed(() => {
-    // This would typically come from an additional API call
-    // For now, we'll estimate based on time and weather conditions
-    return '5' // Placeholder value
   })
 
   const fetchWeatherData = async () => {
@@ -445,6 +200,50 @@
     })
   }
 
+  const formatDate = (timestamp: number): string => {
+    return new Date(timestamp * 1000).toLocaleDateString('en-US', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    })
+  }
+
+  const formatHourlyTime = (timestamp: number): string => {
+    return new Date(timestamp * 1000).toLocaleTimeString([], {
+      hour: 'numeric',
+      minute: '2-digit',
+    })
+  }
+
+  const formatWeekDay = (timestamp: number): string => {
+    return new Date(timestamp * 1000).toLocaleDateString('en-US', {
+      weekday: 'long',
+    })
+  }
+
+  const formatCondition = (description: string): string => {
+    return description.split(' ').map(word =>
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ')
+  }
+
+  const getHourlyForecast = () => {
+    if (!forecastData.value?.list) return []
+    return forecastData.value.list.slice(0, 4)
+  }
+
+  const getWeeklyForecast = () => {
+    if (!forecastData.value?.list) return []
+    // Get one forecast per day (every 8th item since API returns 3-hour intervals)
+    const dailyForecasts = []
+    for (let i = 0; i < forecastData.value.list.length; i += 8) {
+      dailyForecasts.push(forecastData.value.list[i])
+      if (dailyForecasts.length >= 4) break
+    }
+    return dailyForecasts
+  }
+
   const goBack = () => {
     router.back()
   }
@@ -458,131 +257,216 @@
 </script>
 
 <style scoped lang="scss">
-  .weather-detail-card {
-    transition: all 0.3s ease-in-out;
-
-    &--clear {
-      background: linear-gradient(45deg, #2980b9, #6dd5fa);
-      color: white;
-    }
-
-    &--cloudy {
-      background: linear-gradient(45deg, #757f9a, #d7dde8);
-      color: #333;
-    }
-
-    &--rainy {
-      background: linear-gradient(45deg, #00416a, #799f0c, #e4e5e6);
-      color: white;
-    }
-
-    &--stormy {
-      background: linear-gradient(45deg, #141e30, #243b55);
-      color: white;
-    }
-
-    &--snowy {
-      background: linear-gradient(45deg, #e6dada, #274046);
-      color: white;
-    }
-
-    &--misty {
-      background: linear-gradient(45deg, #606c88, #3f4c6b);
-      color: white;
-    }
+  .weather-detail-page {
+    min-height: 100vh;
+    background: #f5f5f5;
   }
 
-  .weather-detail {
-    &__header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
+  .loading-container,
+  .error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  .weather-detail-container {
+    min-height: 100vh;
+  }
+
+  .weather-header {
+    background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+    color: white;
+    padding: 0 1rem 2rem;
+    position: relative;
+  }
+
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .status-icons {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+  }
+
+  .city-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .date {
+    text-align: center;
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+  }
+
+  .main-weather {
+    text-align: center;
+    padding-bottom: 1rem;
+  }
+
+  .weather-icon {
+    margin-bottom: 1rem;
+  }
+
+  .temperature {
+    font-size: 3rem;
+    font-weight: 300;
+    margin-bottom: 0.5rem;
+  }
+
+  .condition {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+  }
+
+  .last-update {
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+
+  .weather-content {
+    background: white;
+    border-radius: 1rem 1rem 0 0;
+    margin-top: -1rem;
+    position: relative;
+    z-index: 1;
+    padding: 1.5rem;
+  }
+
+  .forecast-section {
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+  }
+
+  .hourly-forecast {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    padding: 0.5rem 0;
+  }
+
+  .hourly-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 80px;
+    padding: 1rem 0.5rem;
+    background: #f8f9fa;
+    border-radius: 1rem;
+    text-align: center;
+  }
+
+  .hourly-icon {
+    margin-bottom: 0.5rem;
+  }
+
+  .hourly-temp {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.25rem;
+  }
+
+  .hourly-time {
+    font-size: 0.8rem;
+    color: #666;
+  }
+
+  .weekly-forecast {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .weekly-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 1rem;
+  }
+
+  .weekly-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .weekly-icon {
+    flex-shrink: 0;
+  }
+
+  .weekly-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .weekly-day {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .weekly-condition {
+    font-size: 0.9rem;
+    color: #666;
+  }
+
+  .weekly-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .weekly-temp {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+  }
+
+  // Mobile responsiveness
+  @media (max-width: 600px) {
+    .weather-header {
+      padding: 0 1rem 1.5rem;
     }
 
-    &__location {
-      flex: 1;
+    .temperature {
+      font-size: 2.5rem;
     }
 
-    &__main {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 2rem;
-    }
-
-    &__temperature-section {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    &__feels-like {
-      display: flex;
-      align-items: center;
+    .hourly-forecast {
       gap: 0.5rem;
     }
 
-    &__icon-section {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    &__details {
-      margin-top: 1rem;
-    }
-
-    &__detail {
-      display: flex;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-
-    &__sun-times {
-      margin-top: 1rem;
-    }
-
-    &__footer {
-      margin-top: 2rem;
-    }
-  }
-
-  // Theme adjustments for dark text on light cloudy background
-  .weather-detail-card--cloudy {
-    .text-medium-emphasis {
-      color: rgba(0, 0, 0, 0.6) !important;
-    }
-    .v-icon {
-      color: #333 !important;
-    }
-  }
-
-  // Theme adjustments for light text on dark backgrounds
-  .weather-detail-card--clear,
-  .weather-detail-card--rainy,
-  .weather-detail-card--stormy,
-  .weather-detail-card--snowy,
-  .weather-detail-card--misty {
-    .text-medium-emphasis {
-      color: rgba(255, 255, 255, 0.7) !important;
-    }
-    .v-icon {
-      color: white !important;
-    }
-    .v-divider {
-      border-color: rgba(255, 255, 255, 0.12);
-    }
-  }
-
-  @media (max-width: 900px) {
-    .weather-detail__main {
-      flex-direction: column;
-      gap: 2rem;
-      text-align: center;
-    }
-
-    .weather-detail__temperature-section {
-      align-items: center;
+    .hourly-item {
+      min-width: 70px;
+      padding: 0.75rem 0.25rem;
     }
   }
 </style>
