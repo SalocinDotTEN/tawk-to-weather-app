@@ -143,7 +143,7 @@
           <v-row>
             <v-col
               v-for="weatherData in favoriteWeatherData"
-              :key="weatherData.name"
+              :key="`${weatherData.name}-${weatherData.coord.lat}-${weatherData.coord.lon}`"
               cols="12"
               lg="8"
               md="10"

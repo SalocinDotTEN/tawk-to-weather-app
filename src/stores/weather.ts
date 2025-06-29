@@ -191,11 +191,17 @@ export const useWeatherStore = defineStore('weather', () => {
       )
       const results = await Promise.allSettled(weatherPromises)
 
-      favoriteWeatherData.value = results
-        .filter((result): result is PromiseFulfilledResult<WeatherData> =>
-          result.status === 'fulfilled',
-        )
-        .map(result => result.value)
+      // Keep only successful results and maintain order consistency
+      const successfulWeatherData: WeatherData[] = []
+      for (const [index, result] of results.entries()) {
+        if (result.status === 'fulfilled') {
+          successfulWeatherData.push(result.value)
+        } else {
+          console.error(`Failed to fetch weather for favorite: ${favorites.value[index].name}`, result.reason)
+        }
+      }
+
+      favoriteWeatherData.value = successfulWeatherData
     } catch (error_) {
       console.error('Failed to fetch favorite weather data:', error_)
     }
@@ -239,7 +245,22 @@ export const useWeatherStore = defineStore('weather', () => {
             favorites.value = []
             localStorage.removeItem('weather-favorites')
           } else {
-            favorites.value = parsedFavorites
+            // Deduplicate favorites based on ID to prevent duplicate entries
+            const uniqueFavorites = parsedFavorites.reduce((acc: FavoriteLocation[], current: FavoriteLocation) => {
+              if (!acc.some(fav => fav.id === current.id)) {
+                acc.push(current)
+              }
+              return acc
+            }, [])
+
+            favorites.value = uniqueFavorites
+
+            // Save back if we had duplicates
+            if (uniqueFavorites.length !== parsedFavorites.length) {
+              console.log('Removed duplicate favorites')
+              localStorage.setItem('weather-favorites', JSON.stringify(uniqueFavorites))
+            }
+
             // Load weather data for favorites
             fetchFavoriteWeatherData()
           }
