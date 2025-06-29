@@ -60,12 +60,14 @@ class UnsplashService {
    * @param weatherCondition The weather condition (e.g., 'clear sky', 'rain', 'snow')
    * @param width Desired image width (default: 800)
    * @param height Desired image height (default: 600)
+   * @param locationId Optional location identifier to get varied images for same conditions
    * @returns Promise resolving to WeatherImageData or null if not found
    */
   async getWeatherImage (
     weatherCondition: string,
     width = 800,
     height = 600,
+    locationId?: string,
   ): Promise<WeatherImageData | null> {
     if (!this.accessKey) {
       console.warn('Unsplash access key not configured')
@@ -78,7 +80,7 @@ class UnsplashService {
 
       const url = new URL(`${this.baseUrl}/search/photos`)
       url.searchParams.set('query', searchQuery)
-      url.searchParams.set('per_page', '1')
+      url.searchParams.set('per_page', '5') // Get more results to have variety
       url.searchParams.set('orientation', 'landscape')
       url.searchParams.set('content_filter', 'high')
 
@@ -95,7 +97,16 @@ class UnsplashService {
       const data: UnsplashResponse = await response.json()
 
       if (data.results && data.results.length > 0) {
-        const photo = data.results[0]
+        // If we have a locationId, use it to select a specific image from results
+        // This ensures different locations get different images even with same weather
+        let photoIndex = 0
+        if (locationId && data.results.length > 1) {
+          // Simple hash function to consistently select same image for same location
+          const hash = Array.from(locationId).reduce((acc, char) => acc + (char.codePointAt(0) || 0), 0)
+          photoIndex = hash % data.results.length
+        }
+
+        const photo = data.results[photoIndex]
         // Return complete weather image data with attribution
         return {
           imageUrl: `${photo.urls.raw}&w=${width}&h=${height}&fit=crop&crop=center`,
@@ -123,14 +134,18 @@ class UnsplashService {
     weatherCondition: string,
     width = 800,
     height = 600,
+    locationId?: string,
   ): Promise<WeatherImageData | null> {
-    const cacheKey = `${weatherCondition}-${width}x${height}`
+    // Include locationId in cache key to ensure unique images per location
+    const cacheKey = locationId
+      ? `${weatherCondition}-${locationId}-${width}x${height}`
+      : `${weatherCondition}-${width}x${height}`
 
     if (this.imageCache.has(cacheKey)) {
       return this.imageCache.get(cacheKey) || null
     }
 
-    const imageData = await this.getWeatherImage(weatherCondition, width, height)
+    const imageData = await this.getWeatherImage(weatherCondition, width, height, locationId)
 
     if (imageData) {
       this.imageCache.set(cacheKey, imageData)

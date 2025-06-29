@@ -181,8 +181,10 @@
   onMounted(async () => {
     if (props.weather.weather && props.weather.weather.length > 0) {
       const weatherCondition = props.weather.weather[0].description
+      // Create a unique location identifier for varied images
+      const locationId = `${props.weather.name}-${props.weather.coord.lat}-${props.weather.coord.lon}`
       try {
-        const imageData = await unsplashService.getCachedWeatherImage(weatherCondition, 800, 600)
+        const imageData = await unsplashService.getCachedWeatherImage(weatherCondition, 800, 600, locationId)
         if (imageData) {
           backgroundImage.value = imageData.imageUrl
           imageAttribution.value = imageData
