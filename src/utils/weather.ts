@@ -146,3 +146,45 @@ export function getRelativeTime (timestamp: number): string {
 export function isDayTime (currentTime: number, sunrise: number, sunset: number): boolean {
   return currentTime >= sunrise && currentTime <= sunset
 }
+
+/**
+ * Format local time for a given timezone offset
+ * @param timezoneOffset - Timezone offset in seconds from UTC
+ * @returns Formatted time string (HH:MM AM/PM)
+ */
+export function formatLocalTime (timezoneOffset: number): string {
+  // Get current UTC time
+  const now = new Date()
+  const utcTime = now.getTime() + (now.getTimezoneOffset() * 60_000)
+
+  // Calculate local time using the timezone offset
+  const localTime = new Date(utcTime + (timezoneOffset * 1000))
+
+  // Format as 12-hour time with AM/PM
+  return localTime.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  })
+}
+
+/**
+ * Get a readable timezone name or offset
+ * @param timezoneOffset - Timezone offset in seconds from UTC
+ * @returns Timezone string (e.g., "UTC+5" or "UTC-3")
+ */
+export function getTimezoneString (timezoneOffset: number): string {
+  const hours = timezoneOffset / 3600
+  const sign = hours >= 0 ? '+' : '-'
+  const absHours = Math.abs(hours)
+
+  if (absHours % 1 === 0) {
+    // Whole hours
+    return `UTC${sign}${Math.abs(hours)}`
+  } else {
+    // Has minutes (e.g., UTC+5:30)
+    const wholeHours = Math.floor(absHours)
+    const minutes = Math.round((absHours - wholeHours) * 60)
+    return `UTC${sign}${wholeHours}:${minutes.toString().padStart(2, '0')}`
+  }
+}

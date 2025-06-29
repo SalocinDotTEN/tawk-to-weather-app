@@ -17,6 +17,10 @@
           <h3 :class="(myLocation ? 'text-h6' : 'text-h5') + ' font-weight-bold'">
             {{ weather.name }}, {{ weather.sys.country }}
           </h3>
+          <!-- Local time display -->
+          <p v-if="currentLocalTime && !myLocation" class="text-caption weather-card__local-time">
+            {{ currentLocalTime }}
+          </p>
         </div>
 
         <!-- Right side: Temperature -->
@@ -101,10 +105,11 @@
 
 <script setup lang="ts">
   import type { LocationData, TemperatureUnit, WeatherData } from '@/types/weather'
-  import { computed, onMounted, ref } from 'vue'
+  import { computed, onMounted, onUnmounted, ref } from 'vue'
   import { useRouter } from 'vue-router'
   import TemperatureDisplay from '@/components/atoms/TemperatureDisplay.vue'
   import { unsplashService, type WeatherImageData } from '@/services/unsplashService'
+  import { formatLocalTime } from '@/utils/weather'
 
   interface Props {
     weather: WeatherData
@@ -130,6 +135,17 @@
   // Reactive ref for background image
   const backgroundImage = ref<string | null>(null)
   const imageAttribution = ref<WeatherImageData | null>(null)
+
+  // Reactive ref for current local time
+  const currentLocalTime = ref<string>('')
+  let timeInterval: number | null = null
+
+  // Function to update local time
+  const updateLocalTime = () => {
+    if (props.weather.timezone !== undefined) {
+      currentLocalTime.value = formatLocalTime(props.weather.timezone)
+    }
+  }
 
   const weatherConditionClass = computed(() => {
     if (!props.weather.weather || props.weather.weather.length === 0) {
@@ -201,6 +217,17 @@
       } catch (error) {
         console.warn('Failed to load weather background image:', error)
       }
+    }
+
+    // Start updating local time
+    updateLocalTime() // Initial update
+    timeInterval = window.setInterval(updateLocalTime, 1000) // Update every second
+  })
+
+  // Cleanup interval when component unmounts
+  onUnmounted(() => {
+    if (timeInterval) {
+      clearInterval(timeInterval)
     }
   })
 
@@ -295,6 +322,12 @@
     &__location {
       flex: 1;
       min-width: 0; // Allows text truncation if needed
+    }
+
+    &__local-time {
+      margin-top: 0.25rem;
+      opacity: 0.9;
+      font-weight: 500;
     }
 
     &__temperature-section {
