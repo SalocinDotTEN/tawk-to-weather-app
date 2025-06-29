@@ -2,7 +2,7 @@
   "name": "Tawk.to Weather App",
   "short_name": "Weather App",
   "description": "A beautiful weather app with real-time forecasts",
-  "theme_color": "#1976d2",
+  "theme_color": "#117BEB",
   "background_color": "#ffffff",
   "display": "standalone",
   "orientation": "portrait",
