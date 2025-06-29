@@ -14,6 +14,7 @@ declare module 'vue' {
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
     LoadingSpinner: typeof import('./components/atoms/LoadingSpinner.vue')['default']
     PhoneNumberInput: typeof import('./components/atoms/PhoneNumberInput.vue')['default']
+    PwaInstallPrompt: typeof import('./components/atoms/PwaInstallPrompt.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SearchBar: typeof import('./components/molecules/SearchBar.vue')['default']
