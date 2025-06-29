@@ -16,6 +16,16 @@ A modern, responsive weather application built with Vue.js 3, TypeScript, and Vu
 - **Error Handling**: Graceful error handling with user-friendly messages
 - **Loading States**: Smooth loading indicators throughout the app
 
+## Gravatar Integration for User Profile
+- Automatically generates profile pictures from email using Gravatar service
+- Falls back to identicon if no Gravatar exists for the email
+- Updates automatically when email is changed
+
+## Form Validation Rules for User Profile
+- **Name**: Required, 2-50 characters
+- **Email**: Required, valid email format
+- **Phone**: Required, must match E.164 format
+
 ## 🏗️ Architecture
 
 This project follows **Atomic Design** principles for component organization:
@@ -47,6 +57,10 @@ src/components/
 - **Vite** - Fast build tool and dev server
 - **SCSS** - CSS preprocessor
 
+**Lines of Code**: ~2,000+ lines
+**Components Created**: 10+ reusable components
+**Features Implemented**: 15+ core and advanced features
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -72,7 +86,7 @@ src/components/
    cp .env.example .env
    ```
    
-   Edit `.env` and add your API keys:
+   Edit `.env` and add your API keys (the Vite prefix `VITE_` is required for environment variables in Vite projects):
    ```
    VITE_OPENWEATHER_API_KEY=your_openweather_api_key_here
    VITE_UNSPLASH_ACCESS_KEY=your_unsplash_access_key_here
@@ -84,7 +98,7 @@ src/components/
    ```
 
 5. **Open your browser**
-   Navigate to `http://localhost:5173`
+   Navigate to `http://localhost:<whatever port>` (default is usually 3000) to view the app.
 
 ### Getting API Keys
 
@@ -101,7 +115,7 @@ src/components/
 4. Copy the "Access Key" 
 5. Add the key to your `.env` file as `VITE_UNSPLASH_ACCESS_KEY`
 
-**Note**: The Unsplash API is optional. If not configured, weather cards will use the default gradient backgrounds.
+**Note**: The Unsplash API is optional. If not configured, weather cards will use the default gradient backgrounds and may not display custom images.
 
 ## 🛠️ Development
 
@@ -138,6 +152,8 @@ The application uses **Pinia** for state management with the following stores:
   - Temperature unit preferences
   - Loading and error states
 
+Controlling API calls and state updates through a single store allows for better maintainability and scalability of the application.
+
 ### API Integration
 
 Weather data is fetched from the **OpenWeatherMap API**:
@@ -155,6 +171,7 @@ The `weatherService` (`src/services/weatherService.ts`) handles all API interact
 - Secondary: Complementary accent colors
 - Surface: Clean white/light backgrounds
 - Error: Red for error states
+- Adaptive theme support for light and dark modes depending on device settings or stored in localStorage.
 
 ### Typography
 - Roboto font family
@@ -165,21 +182,6 @@ The `weatherService` (`src/services/weatherService.ts`) handles all API interact
 - Mobile: < 600px
 - Tablet: 600px - 960px
 - Desktop: > 960px
-
-## 🧪 Testing
-
-### Manual Testing Checklist
-
-- [ ] Search for cities works correctly
-- [ ] Current location detection works
-- [ ] Weather data displays properly
-- [ ] Forecast shows 5-day data
-- [ ] Favorites can be added/removed
-- [ ] Temperature units can be switched
-- [ ] Error states display appropriately
-- [ ] Loading states show during API calls
-- [ ] Responsive design works on all devices
-- [ ] Accessibility features work (keyboard navigation, screen readers)
 
 ### Browser Compatibility
 
@@ -229,6 +231,7 @@ The application includes PWA-ready features:
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `VITE_OPENWEATHER_API_KEY` | OpenWeatherMap API key | Yes |
+| `VITE_UNSPLASH_ACCESS_KEY` | Unsplash API key for background images | No |
 
 ### Build Configuration
 
@@ -243,18 +246,10 @@ The project uses Vite with the following key configurations:
 
 This project is licensed under the MIT License.
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests and linting
-5. Submit a pull request
-
 ## 📞 Support
 
 For questions or issues, please open an issue on the repository.
 
 ---
 
-Built with ❤️ using Vue.js 3 and modern web technologies.
+Built using Vue.js 3 and modern web technologies by Salocin.TEN (https://www.salocinten.online).
