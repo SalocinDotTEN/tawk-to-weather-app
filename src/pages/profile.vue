@@ -5,18 +5,11 @@
       <v-row class="mb-4">
         <v-col cols="12">
           <div class="d-flex align-center">
-            <v-btn
-              icon="mdi-arrow-left"
-              variant="text"
-              @click="goBack"
-            />
-            <h1 class="text-h5 font-weight-bold ml-2">
-              Edit Profile
-            </h1>
+            <v-btn icon="mdi-arrow-left" variant="text" @click="goBack" />
+            <h1 class="text-h5 font-weight-bold ml-2"> Edit Profile </h1>
           </div>
         </v-col>
       </v-row>
-
       <!-- Profile Content -->
       <v-row>
         <v-col
@@ -30,14 +23,8 @@
             <!-- Profile Picture Section -->
             <div class="text-center mb-6">
               <div class="profile-avatar-container">
-                <v-avatar
-                  class="profile-avatar"
-                  size="120"
-                >
-                  <v-img
-                    :alt="profileStore.profile.name"
-                    :src="profileStore.gravatarUrl"
-                  />
+                <v-avatar class="profile-avatar" size="120">
+                  <v-img :alt="profileStore.profile.name" :src="profileStore.gravatarUrl" />
                 </v-avatar>
                 <v-btn
                   v-if="isEditing"
@@ -48,25 +35,14 @@
                   variant="elevated"
                 />
               </div>
-              <h2 class="text-h6 font-weight-bold mt-4">
-                {{ profileStore.profile.name }}
-              </h2>
-              <p class="text-body-2 text-medium-emphasis">
-                {{ profileStore.displayInfo }}
-              </p>
+              <h2 class="text-h6 font-weight-bold mt-4"> {{ profileStore.profile.name }} </h2>
+              <p class="text-body-2 text-medium-emphasis"> {{ profileStore.displayInfo }} </p>
             </div>
-
             <!-- Form Section -->
-            <v-form
-              ref="formRef"
-              v-model="formValid"
-              @submit.prevent="handleSubmit"
-            >
+            <v-form ref="formRef" v-model="formValid" @submit.prevent="handleSubmit">
               <!-- Name Field -->
               <div class="mb-4">
-                <label class="text-caption text-medium-emphasis mb-2 d-block">
-                  Name
-                </label>
+                <label class="text-caption text-medium-emphasis mb-2 d-block"> Name </label>
                 <v-text-field
                   v-model="formData.name"
                   density="comfortable"
@@ -74,15 +50,13 @@
                   placeholder="Enter your name"
                   :readonly="!isEditing"
                   :rules="nameRules"
+                  :style="isEditing ? '' : 'pointer-events: none; background-color: var(--v-theme-surface);'"
                   variant="outlined"
                 />
               </div>
-
               <!-- Email Field -->
               <div class="mb-4">
-                <label class="text-caption text-medium-emphasis mb-2 d-block">
-                  Email
-                </label>
+                <label class="text-caption text-medium-emphasis mb-2 d-block"> Email </label>
                 <v-text-field
                   v-model="formData.email"
                   density="comfortable"
@@ -90,11 +64,11 @@
                   placeholder="Enter your email"
                   :readonly="!isEditing"
                   :rules="emailRules"
+                  :style="isEditing ? '' : 'pointer-events: none; background-color: var(--v-theme-surface);'"
                   type="email"
                   variant="outlined"
                 />
               </div>
-
               <!-- Phone Field -->
               <div class="mb-6">
                 <PhoneNumberInput
@@ -104,10 +78,10 @@
                   label="Phone Number"
                   :readonly="!isEditing"
                   required
+                  :style="isEditing ? '' : 'pointer-events: none; background-color: var(--v-theme-surface);'"
                   @validation="handlePhoneValidation"
                 />
               </div>
-
               <!-- Action Button -->
               <v-btn
                 block
@@ -118,9 +92,7 @@
                 size="large"
                 type="submit"
                 variant="elevated"
-              >
-                {{ isEditing ? 'SUBMIT' : 'EDIT' }}
-              </v-btn>
+              > {{ isEditing ? 'SUBMIT' : 'EDIT' }} </v-btn>
             </v-form>
           </v-card>
         </v-col>
