@@ -177,12 +177,21 @@
     return {}
   })
 
+  // Helper function to create consistent location ID (matches store logic)
+  const createLocationId = (weather: WeatherData): string => {
+    const name = weather.name.toLowerCase().replace(/\s+/g, '-')
+    const country = weather.sys.country.toLowerCase().replace(/\s+/g, '-')
+    const baseId = `${name}-${country}-${weather.coord.lat.toFixed(4)}-${weather.coord.lon.toFixed(4)}`
+    // Add myLocation flag to ensure "My Location" has a unique cache entry
+    return props.myLocation ? `my-location-${baseId}` : baseId
+  }
+
   // Load background image when component mounts
   onMounted(async () => {
     if (props.weather.weather && props.weather.weather.length > 0) {
       const weatherCondition = props.weather.weather[0].description
       // Create a unique location identifier for varied images
-      const locationId = `${props.weather.name}-${props.weather.coord.lat}-${props.weather.coord.lon}`
+      const locationId = createLocationId(props.weather)
       try {
         const imageData = await unsplashService.getCachedWeatherImage(weatherCondition, 800, 600, locationId)
         if (imageData) {

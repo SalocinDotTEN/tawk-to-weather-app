@@ -143,7 +143,13 @@
           <v-row>
             <v-col
               v-for="weatherData in favoriteWeatherData"
-              :key="`${weatherData.name}-${weatherData.coord.lat}-${weatherData.coord.lon}`"
+              :key="createLocationId({
+                name: weatherData.name,
+                lat: weatherData.coord.lat,
+                lon: weatherData.coord.lon,
+                country: weatherData.sys.country,
+                state: undefined
+              })"
               cols="12"
               lg="8"
               md="10"
