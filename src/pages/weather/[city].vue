@@ -38,6 +38,13 @@
             <v-btn
               class="mr-2"
               color="white"
+              icon="mdi-account"
+              variant="text"
+              @click="goToProfile"
+            />
+            <v-btn
+              class="mr-2"
+              color="white"
               :icon="isDarkMode ? 'mdi-weather-sunny' : 'mdi-weather-night'"
               :title="isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
               variant="text"
@@ -342,6 +349,10 @@
 
   const goBack = () => {
     router.back()
+  }
+
+  const goToProfile = () => {
+    router.push('/profile')
   }
 
   onMounted(async () => {

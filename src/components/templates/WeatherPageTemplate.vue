@@ -8,6 +8,13 @@
             <h1 class="text-h4 font-weight-bold"> Weather </h1>
           </v-col>
           <v-col class="text-right" cols="6" lg="6" md="12">
+            <!-- Profile button -->
+            <v-btn
+              class="mr-2"
+              icon="mdi-account"
+              variant="text"
+              @click="goToProfile"
+            />
             <!-- Theme toggle button -->
             <ThemeToggle class="ml-2" />
             <!-- Temperature unit toggle -->
@@ -161,10 +168,13 @@
 <script setup lang="ts">
   import type { FavoriteLocation, LocationData, WeatherData } from '@/types/weather'
   import { ref } from 'vue'
+  import { useRouter } from 'vue-router'
   import ThemeToggle from '@/components/atoms/ThemeToggle.vue'
   import SearchBar from '@/components/molecules/SearchBar.vue'
   import WeatherCard from '@/components/molecules/WeatherCard.vue'
   import { TemperatureUnit } from '@/types/weather'
+
+  const router = useRouter()
 
   interface Props {
     currentWeather: WeatherData | null
@@ -237,6 +247,10 @@
 
   const handleSearchInput = (query: string) => {
     emit('search-input', query)
+  }
+
+  const goToProfile = () => {
+    router.push('/profile')
   }
 
   const isFavorite = (weatherData: WeatherData): boolean => {
