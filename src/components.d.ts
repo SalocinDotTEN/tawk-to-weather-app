@@ -9,9 +9,11 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AppFooter: typeof import('./components/AppFooter.vue')['default']
+    CountrySelector: typeof import('./components/atoms/CountrySelector.vue')['default']
     ForecastList: typeof import('./components/organisms/ForecastList.vue')['default']
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
     LoadingSpinner: typeof import('./components/atoms/LoadingSpinner.vue')['default']
+    PhoneNumberInput: typeof import('./components/atoms/PhoneNumberInput.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SearchBar: typeof import('./components/molecules/SearchBar.vue')['default']

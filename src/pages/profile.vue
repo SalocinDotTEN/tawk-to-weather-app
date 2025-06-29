@@ -97,30 +97,15 @@
 
               <!-- Phone Field -->
               <div class="mb-6">
-                <label class="text-caption text-medium-emphasis mb-2 d-block">
-                  Phone Number
-                </label>
-                <v-text-field
+                <PhoneNumberInput
                   v-model="formData.phone"
-                  density="comfortable"
-                  hide-details="auto"
-                  placeholder="123-456-7890"
+                  v-model:country-code="formData.countryCode"
+                  helper-text="Enter your phone number in international format"
+                  label="Phone Number"
                   :readonly="!isEditing"
-                  :rules="phoneRules"
-                  variant="outlined"
-                >
-                  <template #prepend-inner>
-                    <div class="d-flex align-center">
-                      <v-icon
-                        class="mr-2"
-                        color="primary"
-                        icon="mdi-flag"
-                        size="small"
-                      />
-                      <span class="text-body-2">🇺🇸</span>
-                    </div>
-                  </template>
-                </v-text-field>
+                  required
+                  @validation="handlePhoneValidation"
+                />
               </div>
 
               <!-- Action Button -->
@@ -128,7 +113,7 @@
                 block
                 class="text-none"
                 :color="isEditing ? 'primary' : 'primary'"
-                :disabled="isEditing && !formValid"
+                :disabled="isEditing && (!formValid || !phoneValidationState.isValid)"
                 :loading="loading"
                 size="large"
                 type="submit"
@@ -147,6 +132,7 @@
 <script setup lang="ts">
   import { reactive, ref, watch } from 'vue'
   import { useRouter } from 'vue-router'
+  import PhoneNumberInput from '@/components/atoms/PhoneNumberInput.vue'
   import { useProfileStore } from '@/stores/profile'
 
   const profileStore = useProfileStore()
@@ -163,7 +149,11 @@
     name: profileStore.profile.name,
     email: profileStore.profile.email,
     phone: profileStore.profile.phone,
+    countryCode: profileStore.profile.countryCode,
   })
+
+  // Form validation state
+  const phoneValidationState = ref({ isValid: true, error: '' })
 
   // Validation rules
   const nameRules = [
@@ -180,13 +170,10 @@
     },
   ]
 
-  const phoneRules = [
-    (v: string) => !!v || 'Phone number is required',
-    (v: string) => {
-      const pattern = /^\d{3}-\d{3}-\d{4}$/
-      return pattern.test(v) || 'Phone number must be in format: 123-456-7890'
-    },
-  ]
+  // Phone validation handler
+  const handlePhoneValidation = (isValid: boolean, error?: string) => {
+    phoneValidationState.value = { isValid, error: error || '' }
+  }
 
   // Watch for profile changes to update form data
   watch(
@@ -195,6 +182,7 @@
       formData.name = newProfile.name
       formData.email = newProfile.email
       formData.phone = newProfile.phone
+      formData.countryCode = newProfile.countryCode
     },
     { deep: true },
   )
@@ -206,6 +194,7 @@
       formData.name = profileStore.profile.name
       formData.email = profileStore.profile.email
       formData.phone = profileStore.profile.phone
+      formData.countryCode = profileStore.profile.countryCode
       isEditing.value = false
     } else {
       router.back()
@@ -221,7 +210,16 @@
 
     // Validate form
     const { valid } = await formRef.value.validate()
-    if (!valid) return
+
+    // Also check phone validation state
+    if (!valid || !phoneValidationState.value.isValid) {
+      console.log('Form validation failed:', {
+        formValid: valid,
+        phoneValid: phoneValidationState.value.isValid,
+        phoneError: phoneValidationState.value.error,
+      })
+      return
+    }
 
     try {
       loading.value = true
@@ -234,6 +232,7 @@
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
+        countryCode: formData.countryCode,
       })
 
       // Exit edit mode

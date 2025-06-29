@@ -1,20 +1,22 @@
+import type { CountryCode } from 'libphonenumber-js'
 import CryptoJS from 'crypto-js'
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
+import { computed, readonly, ref } from 'vue'
+import { formatE164ForDisplay } from '@/utils/phoneNumber'
 
 export interface ProfileData {
   name: string
   email: string
-  phone: string
-  countryCode: string
+  phone: string // E.164 format
+  countryCode: CountryCode
 }
 
 export const useProfileStore = defineStore('profile', () => {
   // State
   const profile = ref<ProfileData>({
-    name: 'Jane Doe',
-    email: 'jane@gmail.com',
-    phone: '123-456-7890',
+    name: '',
+    email: '',
+    phone: '',
     countryCode: 'US',
   })
 
@@ -31,9 +33,17 @@ export const useProfileStore = defineStore('profile', () => {
   })
 
   const formattedPhone = computed(() => {
-    const phone = profile.value.phone
-    const countryCode = profile.value.countryCode === 'US' ? '+1' : '+1'
-    return `${countryCode} ${phone}`
+    if (!profile.value.phone) {
+      return ''
+    }
+
+    // If phone is already in E.164 format, format it for display
+    if (profile.value.phone.startsWith('+')) {
+      return formatE164ForDisplay(profile.value.phone)
+    }
+
+    // Fallback for old format
+    return profile.value.phone
   })
 
   const displayInfo = computed(() => {
