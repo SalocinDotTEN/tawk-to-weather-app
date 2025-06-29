@@ -13,7 +13,11 @@
   >
     <template #selection="{ item }">
       <div class="d-flex align-center">
-        <span class="mr-2">{{ item.raw.flag }}</span>
+        <img
+          :alt="`${item.raw.name} flag`"
+          class="flag-image mr-2"
+          :src="item.raw.flag"
+        >
         <span class="mr-2">{{ item.raw.dialCode }}</span>
         <span class="text-caption">{{ item.raw.name }}</span>
       </div>
@@ -25,7 +29,11 @@
         :title="item.raw.displayName"
       >
         <template #prepend>
-          <span class="mr-3">{{ item.raw.flag }}</span>
+          <img
+            :alt="`${item.raw.name} flag`"
+            class="flag-image mr-3"
+            :src="item.raw.flag"
+          >
         </template>
 
         <template #append>
@@ -57,7 +65,7 @@
   const enhancedCountries = computed(() =>
     countries.map((country: Country) => ({
       ...country,
-      displayName: `${country.flag} ${country.name} (${country.dialCode})`,
+      displayName: `${country.name} (${country.dialCode})`,
     })),
   )
 </script>
@@ -67,5 +75,12 @@
   :deep(.v-field) {
     border-radius: 12px;
   }
+}
+
+.flag-image {
+  width: 20px;
+  height: auto;
+  object-fit: contain;
+  border-radius: 2px;
 }
 </style>
