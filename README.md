@@ -7,14 +7,16 @@ A modern, responsive weather application built with Vue.js 3, TypeScript, and Vu
 - **Current Weather**: Get real-time weather information for any city
 - **5-Day Forecast**: View detailed weather forecasts
 - **Dynamic Background Images**: Weather cards display beautiful background images matching weather conditions (powered by Unsplash)
-- **Location Services**: Use GPS to get weather for your current location
+- **Location Services**: Use GPS or similar to get weather for your current location
 - **Search with Autocomplete**: Smart city search with suggestions
 - **Favorites**: Save and manage favorite cities
+- **User Profile**: View and edit user profile information
 - **Temperature Units**: Switch between Celsius and Fahrenheit
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
 - **Accessibility**: Built with ARIA standards and keyboard navigation
 - **Error Handling**: Graceful error handling with user-friendly messages
 - **Loading States**: Smooth loading indicators throughout the app
+- **Dark Mode Support**: Automatic dark mode based on system preference or user selection
 
 ## Gravatar Integration for User Profile
 - Automatically generates profile pictures from email using Gravatar service
