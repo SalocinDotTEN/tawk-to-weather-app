@@ -45,6 +45,14 @@
             <v-btn
               class="mr-2"
               color="white"
+              :icon="currentUnitIcon"
+              :title="`Switch to ${nextUnitText}`"
+              variant="text"
+              @click="toggleTemperatureUnit"
+            />
+            <v-btn
+              class="mr-2"
+              color="white"
               :icon="isDarkMode ? 'mdi-weather-sunny' : 'mdi-weather-night'"
               :title="isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
               variant="text"
@@ -74,7 +82,7 @@
           />
 
           <div class="temperature">
-            {{ Math.round(weatherData.main.temp) }}° C
+            {{ Math.round(weatherData.main.temp) }}{{ currentUnitSymbol }}
           </div>
 
           <div class="condition">
@@ -113,7 +121,7 @@
                 :icon-code="item.weather[0].icon"
                 size="2x"
               />
-              <div class="hourly-temp">{{ Math.round(item.main.temp) }}°</div>
+              <div class="hourly-temp">{{ Math.round(item.main.temp) }}{{ currentUnitSymbol }}</div>
               <div class="hourly-time">{{ formatHourlyTime(item.dt) }}</div>
             </div>
           </div>
@@ -141,7 +149,7 @@
                 </div>
               </div>
               <div class="weekly-right">
-                <div class="weekly-temp">{{ Math.round(item.main.temp) }}° C</div>
+                <div class="weekly-temp">{{ Math.round(item.main.temp) }}{{ currentUnitSymbol }}</div>
                 <v-icon icon="mdi-chevron-right" size="small" />
               </div>
             </div>
@@ -200,6 +208,57 @@
   })
 
   const isDarkMode = computed(() => appStore.isDarkMode)
+
+  const currentUnitIcon = computed(() => {
+    switch (unit.value) {
+      case TempUnit.CELSIUS: {
+        return 'mdi-temperature-celsius'
+      }
+      case TempUnit.FAHRENHEIT: {
+        return 'mdi-temperature-fahrenheit'
+      }
+      case TempUnit.KELVIN: {
+        return 'mdi-temperature-kelvin'
+      }
+      default: {
+        return 'mdi-temperature-celsius'
+      }
+    }
+  })
+
+  const nextUnitText = computed(() => {
+    switch (unit.value) {
+      case TempUnit.CELSIUS: {
+        return 'Fahrenheit'
+      }
+      case TempUnit.FAHRENHEIT: {
+        return 'Kelvin'
+      }
+      case TempUnit.KELVIN: {
+        return 'Celsius'
+      }
+      default: {
+        return 'Fahrenheit'
+      }
+    }
+  })
+
+  const currentUnitSymbol = computed(() => {
+    switch (unit.value) {
+      case TempUnit.CELSIUS: {
+        return '°C'
+      }
+      case TempUnit.FAHRENHEIT: {
+        return '°F'
+      }
+      case TempUnit.KELVIN: {
+        return 'K'
+      }
+      default: {
+        return '°C'
+      }
+    }
+  })
 
   const fetchWeatherData = async () => {
     try {
@@ -294,6 +353,30 @@
   const toggleTheme = () => {
     appStore.toggleTheme()
     theme.global.name.value = appStore.isDarkMode ? 'dark' : 'light'
+  }
+
+  const toggleTemperatureUnit = async () => {
+    let nextUnit: TempUnit
+    switch (unit.value) {
+      case TempUnit.CELSIUS: {
+        nextUnit = TempUnit.FAHRENHEIT
+        break
+      }
+      case TempUnit.FAHRENHEIT: {
+        nextUnit = TempUnit.CELSIUS
+        break
+      }
+      default: {
+        nextUnit = TempUnit.FAHRENHEIT
+        break
+      }
+    }
+
+    weatherStore.setUnit(nextUnit)
+    unit.value = nextUnit
+
+    // Refresh weather data with new unit
+    await handleRefresh()
   }
 
   const formatTime = (timestamp: number): string => {
